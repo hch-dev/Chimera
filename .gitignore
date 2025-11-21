@@ -1,0 +1,50 @@
+# --- Python Basics ---
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- Virtual Environment ---
+# Extremely important: Never upload your venv
+venv/
+env/
+.env
+
+# --- AI & Machine Learning Artifacts ---
+# These are large binary files that will exceed GitHub's 100MB limit
+# You should back these up to Google Drive or Hugging Face Hub instead
+*.pth
+*.pt
+*.pkl
+*.h5
+*.onnx
+*.bin
+
+# Specific Model Directories
+saved_models/
+ai_engines/saved_models/
+
+# --- Datasets ---
+# Don't upload raw data (privacy & size issues)
+ai_engines/datasets/
+data/
+
+# --- Attacker Model Specifics ---
+# Hugging Face model dumps are huge
+ai_engines/attacker/gpt2_finetuned/
+
+# --- Backend/Web ---
+# Local database files (if you use SQLite later)
+*.sqlite3
+*.db
+
+# --- IDE & System Files ---
+# Settings files that are specific to your laptop
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# --- Logs & Temporary Files ---
+*.log
+tmp/
