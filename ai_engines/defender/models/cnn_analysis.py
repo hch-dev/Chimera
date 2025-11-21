@@ -5,7 +5,7 @@ import torchvision.transforms as transforms
 from PIL import Image
 
 
-class CNNPhishingDetector(nn.Module);
+class CNNPhishingDetector(nn.Module):
     """
     CNN-based phishing classifier using a modified ResNet18.
     Designed for analyzing webpage screenshots or visual HTML renderings.
