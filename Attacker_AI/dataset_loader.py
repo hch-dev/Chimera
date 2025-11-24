@@ -125,3 +125,8 @@ class AttackerDataset(Dataset):
         text = self.samples[idx]
         ids = self._encode(text)
         return ids
+
+if __name__ == "__main__":
+    ds = AttackerDataset("attacker_data/train.jsonl")
+    print("Samples:", len(ds))
+    print("First sample:", ds[0])
