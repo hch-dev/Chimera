@@ -5,7 +5,7 @@ Checks jsonl structure, field presence and sample counts.
 
 import json
 
-DATASET_PATH = "../attacker_data/train.jsonl"
+DATASET_PATH = "Chimera/attacker_data/train.jsonl"
 
 required_fields = ["input", "target"]
 
