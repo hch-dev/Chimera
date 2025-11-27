@@ -21,6 +21,7 @@ def run(url: str):
 
     # 1. GET REAL DATA (This takes 1-3 seconds)
     # We must load context FIRST because features rely on it
+    # Note: For Data URIs, context loading will likely fail (no network), but that's expected.
     context = load_context(url)
 
     print(f"✅ Context Acquired. Redirects found: {len(context['http']['redirect_chain'])}")
@@ -63,9 +64,11 @@ def run(url: str):
     print("="*40 + "\n")
 
 if __name__ == "__main__":
-    # Ensure user puts http if missing
+    # Ensure user puts http if missing, BUT skip for data/blob URIs
     url_in = input("\nEnter URL to scan (e.g. google.com): ").strip()
-    if not url_in.startswith("http"):
+
+    # Improved protocol check to avoid breaking Data URIs
+    if not url_in.lower().startswith(("http://", "https://", "data:", "blob:")):
         url_in = "https://" + url_in
 
     run(url_in)
