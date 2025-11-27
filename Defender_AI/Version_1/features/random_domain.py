@@ -47,18 +47,21 @@ def extract(url: str, context: dict = None) -> dict:
 
         # A. Entropy Scoring (Dynamic)
         # Normal English domains are usually 2.5 - 3.5
-        # Random strings are usually > 3.8
-        if entropy > 3.5:
-            # Map 3.5 -> 4.5 to a score of 20 -> 100
-            # Formula: (entropy - threshold) * multiplier
-            entropy_score = (entropy - 3.5) * 80
+        # Random strings are usually > 3.8.
+        # Adjusted threshold: > 3.8 is suspicious, > 4.0 is critical.
+        if entropy > 4.0:
+            score += 85
+            flags.append(f"high_entropy_{entropy:.2f}")
+        elif entropy > 3.7:
+             # Map 3.7 -> 4.0 to score 40 -> 80
+            entropy_score = 40 + (entropy - 3.7) * 130
             score += entropy_score
-            flags.append(f"entropy_{entropy:.2f}")
+            flags.append(f"elevated_entropy_{entropy:.2f}")
 
         # B. Gibberish Scoring (Consonants)
         # English is usually ~60% consonants. >80% is suspicious.
         if consonant_ratio > 0.80:
-             ratio_score = (consonant_ratio - 0.80) * 200 # Steep penalty for no vowels
+             ratio_score = (consonant_ratio - 0.80) * 300 # Steeper penalty
              score += ratio_score
              flags.append(f"gibberish_{consonant_ratio:.2f}")
 

@@ -1,4 +1,6 @@
 # Version_1/main.py
+
+# --- 1. FEATURE IMPORTS ---
 from features.homoglyph import extract as homoglyph_extract
 from features.open_redirect import extract as redirect_extract
 from features.ssl_present import extract as ssl_extract
@@ -10,70 +12,113 @@ from features.obfuscation import extract as obfuscation_extract
 from features.fast_flux import extract as fast_flux_extract
 from features.random_domain import extract as random_domain_extract
 
+# --- 2. CORE IMPORTS ---
 from score_engine import evaluate_score
 from log import get_logger
-
-# IMPORT THE NEW LOADER
 from context_loader import load_context
 
 logger = get_logger(__name__)
 
 def run(url: str):
-    print(f"🚀 Initializing Chimera Defense System...")
+    print(f"\n🚀 Initializing Chimera Defense System...")
     print(f"📡 Connecting to live target: {url}...")
 
-    # 1. GET REAL DATA (This takes 1-3 seconds)
-    # We must load context FIRST because features rely on it
-    # Note: For Data URIs, context loading will likely fail (no network), but that's expected.
-    context = load_context(url)
-
-    print(f"✅ Context Acquired. Redirects found: {len(context['http']['redirect_chain'])}")
+    # --- PHASE 1: CONTEXT LOADING ---
+    # Fetches live data (SSL certs, redirect chains, favicons) from the internet.
+    # Note: If the URL is a Data URI, this step might fail or return empty context, which is handled.
+    try:
+        context = load_context(url)
+        redirect_chain = context.get('http', {}).get('redirect_chain', [])
+        redirect_count = len(redirect_chain)
+        print(f"✅ Context Acquired. Redirects found: {redirect_count}")
+    except Exception as e:
+        # Fallback for Data URIs or Network Errors
+        print(f"⚠️ Context Load Warning: {e}")
+        context = {}
 
     results = []
 
-    # 2. RUN ANALYSIS
+    # --- PHASE 2: FEATURE EXTRACTION ---
     print("🧠 Analyzing patterns...")
+
+    # 1. Homoglyph Check (Punycode & Script Mixing)
     results.append(homoglyph_extract(url, context))
+
+    # 2. Redirect Chain Analysis (Open Redirects & Shorteners)
     results.append(redirect_extract(url, context))
+
+    # 3. SSL Verification (Expired, Self-Signed, Wrong Host)
     results.append(ssl_extract(url, context))
+
+    # 4. Favicon Analysis (Brand Impersonation via Icon)
     results.append(favicon_extract(url, context))
+
+    # 5. URL Structure (Authority Abuse '@', Raw IPs)
     results.append(structure_extract(url, context))
+
+    # 6. Domain Abuse (Combosquatting & Subdomain Shadowing)
     results.append(domain_abuse_extract(url, context))
+
+    # 7. Data URI & Protocol Check (Malicious Protocols)
     results.append(data_uri_extract(url, context))
+
+    # 8. Obfuscation Decoder (Base64/Hex Hidden Payloads)
     results.append(obfuscation_extract(url, context))
+
+    # 9. Fast Flux DNS (Dynamic Botnet IPs)
     results.append(fast_flux_extract(url, context))
+
+    # 10. Random Domain DGA (Entropy & Gibberish)
     results.append(random_domain_extract(url, context))
 
-    # 3. SCORE
+    # --- PHASE 3: SCORING ---
     final_score = evaluate_score(results)
 
-    # 4. REPORT
-    print("\n" + "="*40)
-    print("   🛡️  CHIMERA SECURITY REPORT  🛡️")
-    print("="*40)
+    # --- PHASE 4: REPORTING ---
+    print("\n" + "="*50)
+    print("       🛡️  CHIMERA SECURITY REPORT  🛡️")
+    print("="*50)
 
     for r in results:
-        # Visual indicator: Red circle for high risk, Green for safe
-        status = "🔴" if r['score'] > 50 else "🟢"
-        print(f"{status} {r['feature_name'].ljust(25)}: Risk {r['score']}/100")
+        # Safely handle None scores (Error state)
+        score = r.get('score')
+
+        if score is None:
+            status = "⚠️"
+            score_display = "ERR"
+        else:
+            # Visual indicator: Red circle for high risk (>50), Green for safe
+            status = "🔴" if score > 50 else "🟢"
+            score_display = str(int(score)) # Display as integer
+
+        # Format output for readability
+        feature_name = r['feature_name'].replace("_", " ").title()
+        print(f"{status} {feature_name.ljust(30)}: Risk {score_display}/100")
 
         if r.get('message'):
             print(f"    └── {r['message']}")
 
-    print("-" * 40)
-    if final_score > 70:
+    print("-" * 50)
+
+    # Final Verdict Logic
+    if final_score > 80:
         print(f"❌ VERDICT: PHISHING DETECTED (Score: {final_score})")
+        print("   Action: BLOCK IMMEDIATELY")
     elif final_score > 40:
         print(f"⚠️ VERDICT: SUSPICIOUS (Score: {final_score})")
+        print("   Action: WARN USER & SANDBOX")
     else:
         print(f"✅ VERDICT: SAFE (Score: {final_score})")
-    print("="*40 + "\n")
+        print("   Action: ALLOW")
+    print("="*50 + "\n")
 
 if __name__ == "__main__":
-    # Ensure user puts http if missing, BUT skip for data/blob URIs
-    url_in = input("\nEnter URL to scan (e.g. google.com): ").strip()
+    print("\n--- Chimera CLI Scanner v1.0 ---\n")
+    url_in = input("Enter URL to scan (e.g. google.com): ").strip()
 
-    # Improved protocol check to avoid breaking Data URIs
+    # Smart Protocol Handling:
+    # If user types 'google.com', add https://
+    # If user types 'data:text/html...', leave it alone.
     if not url_in.lower().startswith(("http://", "https://", "data:", "blob:")):
         url_in = "https://" + url_in
 
