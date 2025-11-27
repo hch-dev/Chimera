@@ -13,6 +13,7 @@ from features.fast_flux import extract as fast_flux_extract
 from features.random_domain import extract as random_domain_extract
 from features.domain_age import extract as domain_age_extract
 from features.threat_intel import extract as threat_intel_extract
+from features.path_analysis import extract as path_extract
 
 # --- 2. CORE IMPORTS ---
 from score_engine import evaluate_score
@@ -74,6 +75,7 @@ def run(url: str):
     results.append(random_domain_extract(url, context))
     results.append(domain_age_extract(url, context))
     results.append(threat_intel_extract(url, context))
+
 
 
     # --- PHASE 3: SCORING ---
