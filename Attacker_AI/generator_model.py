@@ -1,32 +1,50 @@
-class FeatureGenerator(nn.Module):
-    def __init__(self, feature_dim: int, hidden_dim: int = 128, max_perturb: float = 0.15):
+# generator_model.py
+"""
+A small Transformer-based causal language model from scratch (Decoder-style).
+This is lightweight and works on CPU for small datasets.
+"""
+
+import torch
+import torch.nn as nn
+import math
+
+class PositionalEncoding(nn.Module):
+    def __init__(self, d_model, max_len=512):
         super().__init__()
-        self.feature_dim = feature_dim
-        self.max_perturb = max_perturb
+        pe = torch.zeros(max_len, d_model)
+        position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
+        div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model))
+        pe[:, 0::2] = torch.sin(position * div_term)
+        pe[:, 1::2] = torch.cos(position * div_term)
+        self.pe = pe.unsqueeze(0)  # (1, max_len, d_model)
+    def forward(self, x):
+        # x shape: (batch, seq_len, d_model)
+        return x + self.pe[:, :x.size(1), :].to(x.device)
 
-        self.net = nn.Sequential(
-            nn.Linear(feature_dim, hidden_dim),
-            nn.ReLU(),
-            nn.Linear(hidden_dim, hidden_dim),
-            nn.ReLU(),
-            nn.Linear(hidden_dim, feature_dim)
-        )
+class GeneratorModel(nn.Module):
+    def __init__(self, vocab_size, d_model=256, nhead=4, num_layers=2, max_length=64, dropout=0.1):
+        super().__init__()
+        self.vocab_size = vocab_size
+        self.max_length = max_length
+        self.token_emb = nn.Embedding(vocab_size, d_model)
+        self.pos_enc = PositionalEncoding(d_model, max_len=max_length)
+        decoder_layer = nn.TransformerEncoderLayer(d_model=d_model, nhead=nhead, dropout=dropout)
+        self.transformer = nn.TransformerEncoder(decoder_layer, num_layers=num_layers)
+        self.ln = nn.LayerNorm(d_model)
+        self.head = nn.Linear(d_model, vocab_size)
 
-    def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, Dict[str, Any]]:
-        raw_perturb = self.net(x)
-        perturb = torch.clamp(raw_perturb, -self.max_perturb, self.max_perturb)
-        adv = x + perturb
-        adv = torch.clamp(adv, 0.0, 1.0)
-
-        metadata = {
-            "synthetic": True,
-            "perturb_norm": torch.norm(perturb, p=2).item()
-        }
-        return adv, metadata
-
-def build_generator(config: Dict[str, Any]) -> FeatureGenerator:
-    return FeatureGenerator(
-        feature_dim=config.get("feature_dim", 32),
-        hidden_dim=config.get("hidden_dim", 128),
-        max_perturb=config.get("max_perturb", 0.15)
-    )
+    def forward(self, input_ids, attention_mask=None):
+        # input_ids: (batch, seq)
+        x = self.token_emb(input_ids) * math.sqrt(self.token_emb.embedding_dim)
+        x = self.pos_enc(x)
+        # transformer expects (seq, batch, dim)
+        x = x.permute(1,0,2)
+        # build src_key_padding_mask from attention_mask if given
+        src_key_padding_mask = None
+        if attention_mask is not None:
+            src_key_padding_mask = attention_mask == 0  # True where padded
+        out = self.transformer(x, src_key_padding_mask=src_key_padding_mask)
+        out = out.permute(1,0,2)  # back to (batch, seq, dim)
+        out = self.ln(out)
+        logits = self.head(out)   # (batch, seq, vocab)
+        return logits

@@ -1,132 +1,58 @@
 # dataset_loader.py
 """
-Dataset loader for the Attacker AI (Generator).
-Supports multiple input formats:
-    - .txt   (one prompt per line)
-    - .json  {"text": "..."}
-    - .jsonl one JSON per line
-    - .csv   with a 'text' column
-
-Tokenizes with the HF tokenizer passed from the trainer.
+Loads RonakAJ/phising_email (Hugging Face) or any local dataset with
+a text column. Returns a tokenized torch TensorDataset and a tokenizer.
 """
 
-import os
-import json
-import csv
+from datasets import load_dataset
+from torch.utils.data import TensorDataset
 import torch
-from torch.utils.data import Dataset
+from transformers import AutoTokenizer
+from configs import GeneratorConfig, TrainingConfig
+from utils import log
 
+def find_text_column(ds, candidates):
+    # ds is a datasets.Dataset (single split) or DatasetDict
+    for c in candidates:
+        if c in ds.column_names:
+            return c
+    # fallback: choose first string column
+    for c in ds.column_names:
+        # we only check first row type
+        val = ds[c][0]
+        if isinstance(val, str):
+            return c
+    return None
 
-class AttackerDataset(Dataset):
-    """
-    Loads real-world phishing or malicious-like prompts (safe versions)
-    for training the generator model inside Chimera's Attacker Engine.
+def load_and_tokenize(cfg: GeneratorConfig, tcfg: TrainingConfig):
+    log(f"Loading dataset: {tcfg.dataset_name}")
+    ds = load_dataset(tcfg.dataset_name, split="train")  # RonakAJ/phising_email single split
+    text_col = find_text_column(ds, tcfg.text_column_candidates)
+    if text_col is None:
+        raise ValueError(f"No text column found in dataset. Columns: {ds.column_names}")
+    log(f"Found text column: {text_col} (samples: {len(ds)})")
 
-    This dataset is NOT malicious — it only contains safe examples
-    that the generator will learn structure from.
-    """
+    log(f"Loading tokenizer: {cfg.model_name}")
+    tokenizer = AutoTokenizer.from_pretrained(cfg.model_name)
+    # ensure pad token exists
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
 
-    def __init__(self, dataset_path: str, tokenizer, max_length: int = 128):
-        self.dataset_path = dataset_path
-        self.tokenizer = tokenizer
-        self.max_length = max_length
+    def preprocess(examples):
+        texts = examples[text_col]
+        # basic cleaning: ensure strings
+        texts = [t if isinstance(t, str) else "" for t in texts]
+        enc = tokenizer(texts,
+                        truncation=True,
+                        padding="max_length",
+                        max_length=cfg.max_length)
+        return enc
 
-        if not os.path.exists(self.dataset_path):
-            raise FileNotFoundError(f"Dataset path does not exist → {self.dataset_path}")
+    log(f"Tokenizing {len(ds)} examples (max_length={cfg.max_length})...")
+    tokenized = ds.map(preprocess, batched=True, remove_columns=ds.column_names)
+    input_ids = torch.tensor(tokenized["input_ids"], dtype=torch.long)
+    attention_mask = torch.tensor(tokenized["attention_mask"], dtype=torch.long)
 
-        # load depending on file type
-        ext = os.path.splitext(self.dataset_path)[1].lower()
-
-        if ext == ".txt":
-            self.samples = self._load_txt()
-
-        elif ext == ".json":
-            self.samples = self._load_json()
-
-        elif ext == ".jsonl":
-            self.samples = self._load_jsonl()
-
-        elif ext == ".csv":
-            self.samples = self._load_csv()
-
-        else:
-            raise ValueError(f"Unsupported dataset extension: {ext}")
-
-        if len(self.samples) == 0:
-            raise ValueError("Dataset is empty — found 0 valid samples.")
-
-    # ========================================
-    #   LOADERS
-    # ========================================
-
-    def _load_txt(self):
-        with open(self.dataset_path, "r", encoding="utf-8") as f:
-            lines = [x.strip() for x in f.readlines() if x.strip()]
-        return lines
-
-    def _load_json(self):
-        with open(self.dataset_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-
-        if isinstance(data, dict) and "text" in data:
-            return [data["text"]]
-        elif isinstance(data, list):
-            return [x["text"] for x in data if "text" in x]
-        else:
-            raise ValueError("JSON must contain a 'text' field or a list of such objects.")
-
-    def _load_jsonl(self):
-        samples = []
-        with open(self.dataset_path, "r", encoding="utf-8") as f:
-            for line in f:
-                if not line.strip():
-                    continue
-                obj = json.loads(line)
-                if "text" in obj:
-                    samples.append(obj["text"])
-        return samples
-
-    def _load_csv(self):
-        samples = []
-        with open(self.dataset_path, "r", encoding="utf-8") as f:
-            reader = csv.DictReader(f)
-            if "text" not in reader.fieldnames:
-                raise ValueError("CSV must contain a 'text' column")
-
-            for row in reader:
-                if row["text"].strip():
-                    samples.append(row["text"].strip())
-        return samples
-
-    # ========================================
-    #   TOKENIZATION
-    # ========================================
-
-    def _encode(self, text: str):
-        encoding = self.tokenizer.encode_plus(
-            text,
-            max_length=self.max_length,
-            padding="max_length",
-            truncation=True,
-            return_tensors="pt"
-        )
-
-        # shape: [1, seq_len] → we want [seq_len]
-        return encoding["input_ids"].squeeze(0)
-
-    # ========================================
-    #   PYTORCH DATASET API
-    # ========================================
-
-    def __len__(self):
-        return len(self.samples)
-
-    def __getitem__(self, idx):
-        text = self.samples[idx]
-        ids = self._encode(text)
-        return ids
-
-if __name__ == "__main__":
-    ds = AttackerDataset("attacker_data/train.jsonl")
-    print("Samples:", len(ds))
-    print("First sample:", ds[0])
+    dataset = TensorDataset(input_ids, attention_mask)
+    log(f"Tokenized shape: {input_ids.shape}")
+    return dataset, tokenizer
