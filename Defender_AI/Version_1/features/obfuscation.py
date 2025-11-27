@@ -3,7 +3,7 @@
 import re
 import base64
 import binascii
-from urllib.parse import unquote
+from urllib.parse import unquote, urlparse, parse_qs
 from log import get_logger
 
 logger = get_logger(__name__)
@@ -11,66 +11,67 @@ logger = get_logger(__name__)
 FEATURE_NAME = "obfuscation_analysis"
 WEIGHT = 0.40
 
-# Keywords that are suspicious if found hidden inside encoding
 SENSITIVE_KEYWORDS = {
     "login", "signin", "verify", "account", "secure",
     "update", "password", "credential", "paypal",
-    "google", "microsoft", "bank", "alert", "confirm"
+    "google", "microsoft", "bank", "alert", "confirm",
+    "drive", "doc", "sheet"
 }
 
 def try_base64_decode(s: str) -> str:
     """
-    Attempts to decode a string as Base64.
-    Returns the decoded string if successful and readable, else None.
+    Attempts to decode a string as Base64 (Standard or URL-Safe).
     """
-    # Basic heuristic: Base64 usually isn't very short
-    if len(s) < 8:
-        return None
+    if len(s) < 6: return None
 
-    # Fix padding if necessary
+    # Fix padding
     padding = 4 - (len(s) % 4)
     if padding != 4:
         s += "=" * padding
 
     try:
-        # Attempt decode
-        decoded_bytes = base64.b64decode(s, validate=True)
+        # 1. Try URL-Safe decode first (handles - and _)
+        # This is common in URL parameters
+        decoded_bytes = base64.urlsafe_b64decode(s)
         decoded_str = decoded_bytes.decode('utf-8', errors='ignore')
 
-        # Validation: Is the result actually readable text?
-        # If > 80% of chars are printable, it's likely text/code.
-        # If it's binary garbage, ignore it.
+        # Check readability
         printable = sum(1 for c in decoded_str if c.isprintable())
-        if len(decoded_str) > 0 and (printable / len(decoded_str) > 0.8):
+        if len(decoded_str) > 3 and (printable / len(decoded_str) > 0.75):
             return decoded_str.lower()
 
-    except (binascii.Error, UnicodeDecodeError):
-        pass
+    except (binascii.Error, ValueError):
+        # 2. Fallback: Standard Base64 (handles + and /)
+        # Some encoders might use standard b64 in params even if unsafe
+        try:
+            # Standard b64 doesn't like - or _, so we swap them if present
+            s_std = s.replace('-', '+').replace('_', '/')
+            decoded_bytes = base64.b64decode(s_std, validate=False)
+            decoded_str = decoded_bytes.decode('utf-8', errors='ignore')
+
+            printable = sum(1 for c in decoded_str if c.isprintable())
+            if len(decoded_str) > 3 and (printable / len(decoded_str) > 0.75):
+                return decoded_str.lower()
+        except Exception:
+            pass
 
     return None
 
 def extract(url: str, context: dict = None) -> dict:
-    """
-    Comprehensive Obfuscation Scanner.
-    1. Decodes Percent-Encoding (%61 -> a) and checks for hidden keywords.
-    2. Hunts for Base64 strings, decodes them, and checks for hidden URLs (Redirects) or keywords.
-    """
     try:
         # ---------------------------------------------------------
-        # 1. Percent / Hex Decoding Analysis
+        # 1. Percent Decoding Check (Hex)
         # ---------------------------------------------------------
-        # e.g. "http://site.com/%6c%6f%67%69%6e" -> "login"
         decoded_url = unquote(url).lower()
         raw_url_lower = url.lower()
 
         found_hex_keywords = []
         for kw in SENSITIVE_KEYWORDS:
-            # If keyword exists in DECODED version but NOT in RAW version, it was hidden.
             if kw in decoded_url and kw not in raw_url_lower:
                 found_hex_keywords.append(kw)
 
         if found_hex_keywords:
-            return {
+             return {
                 "feature_name": FEATURE_NAME,
                 "score": 80,
                 "weight": WEIGHT,
@@ -79,36 +80,53 @@ def extract(url: str, context: dict = None) -> dict:
             }
 
         # ---------------------------------------------------------
-        # 2. Base64 Analysis (Hidden Redirects & Payloads)
+        # 2. Smart Base64 Extraction
         # ---------------------------------------------------------
-        # Regex to find potential Base64 strings (alphanumeric + '+' '/' '=')
-        # We look for chunks of length 10+ to avoid false positives on short IDs
-        potential_b64_strings = re.findall(r'[a-zA-Z0-9+/=]{10,}', url)
+        candidates = set()
 
-        for b64 in potential_b64_strings:
-            decoded = try_base64_decode(b64)
+        # Method A: URL Params (parse_qs handles encoded values automatically)
+        parsed = urlparse(url)
+        params = parse_qs(parsed.query)
+        for key, values in params.items():
+            for val in values:
+                candidates.add(val)
+
+        # Method B: Path Regex (CRITICAL FIX)
+        # We look for alphanumeric chars plus -, _, +, =
+        # We intentionally EXCLUDE '/' to ensure we grab tokens BETWEEN slashes.
+        # e.g. /v2/dXBkYXRlX3Bhc3N3b3Jk/config -> grabs "dXBkYXRlX3Bhc3N3b3Jk"
+        path_candidates = re.findall(r'[a-zA-Z0-9+\-_=]{10,}', url)
+        candidates.update(path_candidates)
+
+        # ---------------------------------------------------------
+        # 3. Analyze Candidates
+        # ---------------------------------------------------------
+        for candidate in candidates:
+            # Strip any accidental trailing equals signs that might be doubled
+            candidate = candidate.rstrip('=')
+
+            decoded = try_base64_decode(candidate)
 
             if decoded:
-                # A. Check for Hidden Redirects (URL inside URL)
-                # e.g. site.com?ref=aHR0cDovL2V2aWwuY29t (http://evil.com)
-                if "http://" in decoded or "https://" in decoded or "www." in decoded:
-                    return {
+                # Check A: Hidden URL (Redirect Evasion)
+                if any(x in decoded for x in ["http:", "https:", "www.", ".com", ".net", ".org"]):
+                     return {
                         "feature_name": FEATURE_NAME,
-                        "score": 90,  # High risk: Hiding a destination URL
+                        "score": 90,
                         "weight": WEIGHT,
                         "error": False,
-                        "message": f"hidden_redirect_in_base64: {decoded[:50]}..."
+                        "message": f"hidden_redirect_in_base64: {decoded[:30]}..."
                     }
 
-                # B. Check for Hidden Keywords
-                hidden_b64_kws = [kw for kw in SENSITIVE_KEYWORDS if kw in decoded]
-                if hidden_b64_kws:
+                # Check B: Hidden Keywords
+                hidden_kws = [kw for kw in SENSITIVE_KEYWORDS if kw in decoded]
+                if hidden_kws:
                     return {
                         "feature_name": FEATURE_NAME,
                         "score": 85,
                         "weight": WEIGHT,
                         "error": False,
-                        "message": f"hidden_keywords_in_base64: {hidden_b64_kws}"
+                        "message": f"hidden_keywords_in_base64: {hidden_kws}"
                     }
 
         return {
