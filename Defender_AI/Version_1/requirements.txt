@@ -1,0 +1,33 @@
+# Step 1 - Open terminal
+# Step 2 - cd to/your/current/path
+# Step 3 - pip install -r requirements.txt
+# Step 4 - python main.py
+
+
+
+# --- Core API & Network ---
+requests>=2.31.0
+urllib3>=2.0.0
+
+# --- Feature Extraction ---
+# For homoglyph & domain parsing
+tldextract>=5.1.0
+idna>=3.6
+
+# For DNS / Fast Flux
+dnspython>=2.6.0
+
+# For WHOIS / Domain Age
+python-whois>=0.9.0    # Wrapper for system 'whois' command
+python-dateutil>=2.8.0 # For easy date parsing from APIs
+
+# For HTML Parsing (Favicon)
+beautifulsoup4>=4.12.0
+
+# For OTX / Threat Intel
+OTXv2>=1.5.0           # AlienVault SDK
+pymisp>=2.4.180        # MISP SDK (Optional but good to have)
+
+# --- System & Utilities ---
+# For colored terminal output (optional but nice for demos)
+colorama>=0.4.6
