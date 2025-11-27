@@ -1,4 +1,5 @@
-# Version_1/features/url/homoglyph.py
+# Checks if there are any homoglyph characters
+
 from urllib.parse import urlparse
 import unicodedata
 from log import get_logger

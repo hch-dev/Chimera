@@ -1,3 +1,5 @@
+#Checks if the site has a ssl certificate and its nature
+
 from datetime import datetime
 from log import get_logger
 

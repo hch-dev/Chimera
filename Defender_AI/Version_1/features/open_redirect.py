@@ -1,3 +1,5 @@
+#Checks the number of redirects in a link
+
 from urllib.parse import urlparse
 import tldextract
 from log import get_logger

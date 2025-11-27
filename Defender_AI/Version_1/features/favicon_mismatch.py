@@ -1,3 +1,5 @@
+#Check if the favicon and the site do not match
+
 from urllib.parse import urlparse
 import tldextract
 from log import get_logger

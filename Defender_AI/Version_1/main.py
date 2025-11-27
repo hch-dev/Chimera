@@ -2,7 +2,8 @@
 from features.homoglyph import extract as homoglyph_extract
 from features.open_redirect import extract as redirect_extract
 from features.ssl_present import extract as ssl_extract
-from features.favicon_mismatch import extract as favicon_extract  # <--- Import Added
+from features.favicon_mismatch import extract as favicon_extract
+from features.url_structure import extract as structure_extract
 
 from score_engine import evaluate_score
 from log import get_logger
@@ -29,7 +30,8 @@ def run(url: str):
     results.append(homoglyph_extract(url, context))
     results.append(redirect_extract(url, context))
     results.append(ssl_extract(url, context))
-    results.append(favicon_extract(url, context)) # <--- Added Here (Correct Place)
+    results.append(favicon_extract(url, context))
+    results.append(structure_extract(url, context))
 
     # 3. SCORE
     final_score = evaluate_score(results)
