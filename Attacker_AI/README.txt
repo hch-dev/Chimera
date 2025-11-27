@@ -23,7 +23,7 @@ FILES
    - Supports teacher forcing during training
    - Supports autoregressive sampling during inference
 
-4. inference.py
+4. generator_inference.py
    - Loads tokenizer.json
    - Loads models/generator_final.pt
    - Generates sample phishing-style emails
@@ -46,4 +46,5 @@ NOTES
       models/generator_final.pt
       tokenizer.json
   are present in this directory.
+
 
