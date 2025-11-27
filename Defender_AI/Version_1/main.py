@@ -1,6 +1,8 @@
+# Version_1/main.py
 from features.homoglyph import extract as homoglyph_extract
 from features.open_redirect import extract as redirect_extract
 from features.ssl_present import extract as ssl_extract
+from features.favicon_mismatch import extract as favicon_extract  # <--- Import Added
 
 from score_engine import evaluate_score
 from log import get_logger
@@ -15,6 +17,7 @@ def run(url: str):
     print(f"📡 Connecting to live target: {url}...")
 
     # 1. GET REAL DATA (This takes 1-3 seconds)
+    # We must load context FIRST because features rely on it
     context = load_context(url)
 
     print(f"✅ Context Acquired. Redirects found: {len(context['http']['redirect_chain'])}")
@@ -26,6 +29,7 @@ def run(url: str):
     results.append(homoglyph_extract(url, context))
     results.append(redirect_extract(url, context))
     results.append(ssl_extract(url, context))
+    results.append(favicon_extract(url, context)) # <--- Added Here (Correct Place)
 
     # 3. SCORE
     final_score = evaluate_score(results)
@@ -36,8 +40,10 @@ def run(url: str):
     print("="*40)
 
     for r in results:
+        # Visual indicator: Red circle for high risk, Green for safe
         status = "🔴" if r['score'] > 50 else "🟢"
         print(f"{status} {r['feature_name'].ljust(25)}: Risk {r['score']}/100")
+
         if r.get('message'):
             print(f"    └── {r['message']}")
 

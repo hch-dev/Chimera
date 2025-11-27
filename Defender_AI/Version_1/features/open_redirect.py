@@ -1,12 +1,23 @@
-# Version_1/features/redirects/open_redirect.py
 from urllib.parse import urlparse
+import tldextract
 from log import get_logger
 
 logger = get_logger(__name__)
 
 FEATURE_NAME = "open_redirect_detection"
-WEIGHT = 0.35  # critical weight in the critical bucket
+WEIGHT = 0.35
 
+def _get_root_domain(url):
+    """
+    Extracts 'google.com' from 'www.google.com' or 'mail.google.co.uk'
+    """
+    try:
+        ext = tldextract.extract(url)
+        if not ext.domain:
+            return ""
+        return f"{ext.domain}.{ext.suffix}".lower()
+    except:
+        return ""
 
 def _host_of(u):
     try:
@@ -14,15 +25,13 @@ def _host_of(u):
     except Exception:
         return ""
 
-
 def extract(url: str, context: dict = None) -> dict:
     """
     Detect open-redirect / suspicious redirect chains.
-    Heuristics:
-      - If redirect chain length > 1 and hosts change -> suspicious
-      - If chain length >= 4 -> more suspicious
-      - If redirect leads to an IP host or to a different TLD + login words -> raise score
-    Returns score 0-100.
+    Improved Heuristics:
+      - Ignore redirects within the same root domain (google.com -> www.google.com is SAFE).
+      - Ignore HTTP -> HTTPS upgrades.
+      - Flag only if redirect jumps to a completely different external domain.
     """
     try:
         context = context or {}
@@ -38,55 +47,66 @@ def extract(url: str, context: dict = None) -> dict:
                 "message": "no_redirects"
             }
 
-        # Normalize host list
-        hosts = [_host_of(h).lower() for h in chain if _host_of(h)]
-        if not hosts:
-            return {
+        # Get the start and end of the chain
+        original_url = chain[0]
+        final_url = chain[-1]
+
+        orig_root = _get_root_domain(original_url)
+        final_root = _get_root_domain(final_url)
+
+        # 1. Same Root Domain Check (The Fix)
+        # If we start at google.com and end at www.google.co.in, it's technically the same entity.
+        # Checking if the 'domain' part matches handles this (google == google).
+        orig_ext = tldextract.extract(original_url)
+        final_ext = tldextract.extract(final_url)
+
+        same_entity = (orig_ext.domain == final_ext.domain)
+
+        if same_entity:
+             return {
                 "feature_name": FEATURE_NAME,
                 "score": 0,
                 "weight": WEIGHT,
                 "error": False,
-                "message": "no_hosts_in_chain"
+                "message": f"internal_redirect_safe ({orig_root} -> {final_root})"
             }
 
-        orig = hosts[0]
-        final = hosts[-1]
-
-        diff_hosts = orig != final
-
-        # FIXED: removed invalid inline if-else inside generator expression
-        external_count = sum(
-            1 for h in hosts
-            if orig and h and not h.endswith(orig.split(".", 1)[-1])
-        )
-
-        # Final is IP → suspicious
-        final_is_ip = all(part.isdigit() for part in final.split(".")) if final else False
-
+        # 2. External Redirect Analysis
         score = 0
 
-        if diff_hosts:
+        # If we jumped to a totally different domain
+        if not same_entity:
             score += 50
-        if len(chain) >= 3:
-            score += 20
-        if external_count > 0:
-            score += min(20, external_count * 10)
-        if final_is_ip:
-            score += 15
 
-        suspicious_tokens = ("login", "secure", "verify", "signin", "account")
+            # Check for known safe redirectors (optional whitelist)
+            safe_redirectors = {'bit.ly', 'goo.gl', 't.co', 'youtu.be', 'linkedin.com'}
+            if orig_root in safe_redirectors:
+                score -= 30 # Lower risk for known shorteners (they are meant to redirect)
+
+        # Chain length check
+        if len(chain) >= 4:
+            score += 20  # Long chains are suspicious regardless of domain
+
+        # Final destination is an IP address? (High Risk)
+        final_host = _host_of(final_url)
+        final_is_ip = all(part.isdigit() for part in final_host.split(".")) if final_host else False
+        if final_is_ip:
+            score += 30
+
+        # Suspicious keywords in the chain
+        suspicious_tokens = ("login", "secure", "verify", "signin", "account", "update")
         token_present = any(
-            any(tok in part.lower() for tok in suspicious_tokens)
-            for part in chain
+            any(tok in u.lower() for tok in suspicious_tokens)
+            for u in chain
         )
-        if token_present:
-            score += 15
+        if token_present and not same_entity:
+            score += 20
 
         score = max(0, min(100, score))
 
         msg = (
-            f"len_chain={len(chain)} diff_hosts={diff_hosts} "
-            f"external_count={external_count} final_ip={final_is_ip} token={token_present}"
+            f"len_chain={len(chain)} same_entity={same_entity} "
+            f"orig={orig_root} final={final_root} final_ip={final_is_ip}"
         )
 
         return {
