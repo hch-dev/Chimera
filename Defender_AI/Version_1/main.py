@@ -75,7 +75,7 @@ def run(url: str):
     results.append(random_domain_extract(url, context))
     results.append(domain_age_extract(url, context))
     results.append(threat_intel_extract(url, context))
-
+    results.append(path_extract(url, context))
 
 
     # --- PHASE 3: SCORING ---
