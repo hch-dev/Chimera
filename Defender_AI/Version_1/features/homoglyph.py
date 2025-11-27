@@ -1,88 +1,83 @@
-""" HOMOGLYPH / CHARACTER LOOKALIKES (PUNYCODE ANALYSIS) """
-# Path: Version_1/features/homoglyph.py
+# Version_1/features/url/homoglyph.py
+from urllib.parse import urlparse
+import unicodedata
+from log import get_logger
 
-from __future__ import annotations
-import logging
-from typing import Dict, Optional
-import idna
+logger = get_logger(__name__)
 
-logger = logging.getLogger(__name__)
+FEATURE_NAME = "homoglyph_impersonation"
+WEIGHT = 0.40  # critical weight in the critical bucket
 
+def _has_non_latin(char):
+    try:
+        name = unicodedata.name(char)
+    except ValueError:
+        return True
+    # If the Unicode name contains "LATIN" it's likely a normal ascii/latin char
+    return "LATIN" not in name
 
-def _to_unicode(domain: str) -> str:
+def _punycode_indicator(host: str) -> bool:
+    # IDN punycode labels start with "xn--"
+    labels = host.split(".")
+    return any(lbl.startswith("xn--") for lbl in labels)
+
+def extract(url: str, context: dict = None) -> dict:
     """
-    Convert an ASCII/punycode domain (xn--...) to Unicode.
-    If conversion fails, return the original domain.
+    Heuristic homoglyph detector:
+    - strong suspicion if domain contains punycode (xn--) labels
+    - medium suspicion if domain contains non-Latin Unicode characters or mixed-scripts
+    - lower suspicion if domain only ASCII letters/digits
+    Returns score 0-100.
     """
     try:
-        # idna.decode expects one label at a time; idna.decode on whole domain works too
-        return idna.decode(domain)
-    except Exception:
-        try:
-            # fallback: decode each label separated by dots
-            labels = domain.split(".")
-            return ".".join(idna.decode(lbl) if lbl.startswith("xn--") else lbl for lbl in labels)
-        except Exception:
-            logger.debug("punycode decode failed for %s", domain)
-            return domain
+        context = context or {}
+        parsed = urlparse(url if "://" in url else "http://" + url)
+        host = (parsed.hostname or "").strip()
 
-
-def analyze_punycode(host: str) -> Dict[str, Optional[str]]:
-    """
-    Returns:
-      {
-        "host_raw": str,
-        "is_punycode": bool,
-        "punycode": str | None,
-        "unicode": str | None,
-        "homoglyph_suspected": 0|1
-      }
-    Best-effort: never raises. Caller can examine `homoglyph_suspected`.
-    """
-    out: Dict[str, Optional[str]] = {
-        "host_raw": host,
-        "is_punycode": False,
-        "punycode": None,
-        "unicode": None,
-        "homoglyph_suspected": 0,
-    }
-
-    try:
         if not host:
-            return out
+            return {"feature_name": FEATURE_NAME, "score": 0, "weight": WEIGHT, "error": False,
+                    "message": "no-host"}
 
-        # If host already contains 'xn--' then it's punycode
-        if "xn--" in host.lower():
-            out["is_punycode"] = True
-            out["punycode"] = host
-            uni = _to_unicode(host)
-            out["unicode"] = uni
-            # If Unicode differs and contains non-ascii letters, suspect homoglyphs
-            if uni and any(ord(c) > 127 for c in uni):
-                out["homoglyph_suspected"] = 1
-            return out
+        # Quick high-signal checks
+        if _punycode_indicator(host):
+            # punycode strongly indicates IDN usage → high risk
+            return {"feature_name": FEATURE_NAME, "score": 95, "weight": WEIGHT, "error": False,
+                    "message": "punycode_detected"}
 
-        # Otherwise, check whether punycode encoding of the unicode form differs
-        try:
-            # Attempt to encode -> this will raise on invalid characters
-            encoded = idna.encode(host).decode("ascii")
-            # If encoding produces xn-- anywhere, mark punycode representation
-            if "xn--" in encoded:
-                out["punycode"] = encoded
-                out["unicode"] = host
-                out["is_punycode"] = True
-                out["homoglyph_suspected"] = 1
+        # Check for non-latin characters and script mixing
+        has_non_latin = False
+        scripts = set()
+        for ch in host:
+            if ch == "." or ch == "-":
+                continue
+            try:
+                name = unicodedata.name(ch)
+            except ValueError:
+                # unnameable codepoint -> treat as suspicious
+                has_non_latin = True
+                continue
+            if "LATIN" not in name:
+                has_non_latin = True
+                scripts.add(name.split()[0])
             else:
-                out["unicode"] = host
-                out["is_punycode"] = False
-        except Exception:
-            # If encoding fails, still provide unicode guess
-            out["unicode"] = host
+                scripts.add("LATIN")
 
-        # Heuristic: if unicode contains non-ascii or rare characters, suspect homoglyph
-        if out["unicode"] and any(ord(c) > 127 for c in out["unicode"]):
-            out["homoglyph_suspected"] = 1
+        if has_non_latin and len(scripts) >= 1:
+            # If host contains characters from other scripts or mixed scripts -> suspicious
+            score = 80 if len(scripts) > 1 else 65
+            return {"feature_name": FEATURE_NAME, "score": score, "weight": WEIGHT, "error": False,
+                    "message": f"non_latin_chars scripts={list(scripts)[:4]}"}
 
-    except Exception as exc:
-        logger.debug("analyze_punycode error: %s", exc)
-    return out
+        # Very basic homoglyph heuristic: look for characters outside ASCII range
+        if any(ord(c) > 127 for c in host):
+            return {"feature_name": FEATURE_NAME, "score": 70, "weight": WEIGHT, "error": False,
+                    "message": "non_ascii_chars_present"}
+
+        # Otherwise low risk
+        return {"feature_name": FEATURE_NAME, "score": 0, "weight": WEIGHT, "error": False,
+                "message": "ascii_only"}
+
+    except Exception as e:
+        logger.exception("Homoglyph feature failed for URL=%s : %s", url, e)
+        return {"feature_name": FEATURE_NAME, "score": None, "weight": WEIGHT, "error": True,
+                "message": str(e)}
