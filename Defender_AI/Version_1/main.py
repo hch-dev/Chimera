@@ -28,7 +28,7 @@ def run(url: str):
 
     # --- PHASE 1: CONTEXT LOADING ---
     # Fetches live data (SSL certs, redirect chains, favicons) from the internet.
-    # Note: If the URL is a Data URI, this step might fail or return empty context, which is handled.
+    # If the URL is a Data URI, this step might fail or return empty context, which is handled.
     try:
         context = load_context(url)
         redirect_chain = context.get('http', {}).get('redirect_chain', [])
@@ -44,34 +44,15 @@ def run(url: str):
     # --- PHASE 2: FEATURE EXTRACTION ---
     print("🧠 Analyzing patterns...")
 
-    # 1. Homoglyph Check (Punycode & Script Mixing)
     results.append(homoglyph_extract(url, context))
-
-    # 2. Redirect Chain Analysis (Open Redirects & Shorteners)
     results.append(redirect_extract(url, context))
-
-    # 3. SSL Verification (Expired, Self-Signed, Wrong Host)
     results.append(ssl_extract(url, context))
-
-    # 4. Favicon Analysis (Brand Impersonation via Icon)
     results.append(favicon_extract(url, context))
-
-    # 5. URL Structure (Authority Abuse '@', Raw IPs)
     results.append(structure_extract(url, context))
-
-    # 6. Domain Abuse (Combosquatting & Subdomain Shadowing)
     results.append(domain_abuse_extract(url, context))
-
-    # 7. Data URI & Protocol Check (Malicious Protocols)
     results.append(data_uri_extract(url, context))
-
-    # 8. Obfuscation Decoder (Base64/Hex Hidden Payloads)
     results.append(obfuscation_extract(url, context))
-
-    # 9. Fast Flux DNS (Dynamic Botnet IPs)
     results.append(fast_flux_extract(url, context))
-
-    # 10. Random Domain DGA (Entropy & Gibberish)
     results.append(random_domain_extract(url, context))
     results.append(domain_age_extract(url, context))
     results.append(threat_intel_extract(url, context))
