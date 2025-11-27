@@ -7,6 +7,7 @@ from features.url_structure import extract as structure_extract
 from features.domain_abuse import extract as domain_abuse_extract
 from features.data_uri import extract as data_uri_extract
 from features.obfuscation import extract as obfuscation_extract
+from features.fast_flux import extract as fast_flux_extract
 
 from score_engine import evaluate_score
 from log import get_logger
@@ -39,6 +40,7 @@ def run(url: str):
     results.append(domain_abuse_extract(url, context))
     results.append(data_uri_extract(url, context))
     results.append(obfuscation_extract(url, context))
+    results.append(fast_flux_extract(url, context))
 
     # 3. SCORE
     final_score = evaluate_score(results)
