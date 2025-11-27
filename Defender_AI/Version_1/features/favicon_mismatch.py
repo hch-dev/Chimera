@@ -34,18 +34,13 @@ def extract(url: str, context: dict = None) -> dict:
         img_hash = favicon_info.get("md5")
         icon_url = favicon_info.get("url")
 
-        # Extract root domains (e.g., 'google.com' from 'mail.google.com')
         page_root = _get_domain_root(url)
-        page_name = page_root.split('.')[0] # 'google' from 'google.com'
+        page_name = page_root.split('.')[0]
 
-        # --- STRATEGY 1: Hash Database Check (The "Smoking Gun") ---
-        # This is high confidence. If we KNOW it's the Google logo, the domain MUST be Google.
+        # --- STRATEGY 1: Hash Database Check ---
         detected_brand = KNOWN_FAVICONS.get(img_hash)
 
         if detected_brand:
-            # Does the page domain contain the brand name?
-            # e.g. 'google' in 'google.com' -> True
-            # e.g. 'google' in 'go0gle.com' -> False
             if detected_brand in page_root:
                  return {
                     "feature_name": FEATURE_NAME,
@@ -55,7 +50,6 @@ def extract(url: str, context: dict = None) -> dict:
                     "message": f"valid_{detected_brand}_icon"
                 }
             else:
-                # Critical Mismatch: Google Logo on random domain
                 return {
                     "feature_name": FEATURE_NAME,
                     "score": 100,
@@ -64,35 +58,30 @@ def extract(url: str, context: dict = None) -> dict:
                     "message": f"MISMATCH: Found {detected_brand} icon on {page_root}"
                 }
 
-        # --- STRATEGY 2: Cross-Origin Hotlinking Check (The "Heuristic") ---
+        # --- STRATEGY 2: Cross-Origin Hotlinking Check ---
         if icon_url:
             icon_root = _get_domain_root(icon_url)
 
-            # If the icon comes from a different domain
             if icon_root and icon_root != page_root:
 
-                # HEURISTIC A: Organization Keyword Match
-                # e.g. page="chase.com", icon="assets-chase.com" -> Safe
+                # Check 1: Organization Keyword Match
                 if page_name in icon_root or icon_root.split('.')[0] in page_root:
                     return {"feature_name": FEATURE_NAME, "score": 0, "weight": WEIGHT, "error": False, "message": "cross_origin_related_domain"}
 
-                # HEURISTIC B: Whitelist
+                # Check 2: Common Infrastructure Whitelist
                 common_hosts = {
                     'imgur.com', 'cloudfront.net', 'wordpress.com', 'wix.com', 'squarespace.com',
                     'gstatic.com', 'googleusercontent.com', 'fbcdn.net', 'akamaihd.net',
-                    'twimg.com', 'azureedge.net', 'amazonaws.com', 'shopify.com'
+                    'twimg.com', 'azureedge.net', 'amazonaws.com', 'shopify.com',
+                    'wsimg.com', 'godaddy.com', 'secureserver.net', 'media-amazon.com'
                 }
 
-                # Check if icon_root ends with any common host (handles subdomains like my-bucket.s3.amazonaws.com)
                 if any(icon_root.endswith(host) for host in common_hosts):
                     return {"feature_name": FEATURE_NAME, "score": 0, "weight": WEIGHT, "error": False, "message": "valid_cdn_hotlink"}
 
-                # HEURISTIC C: Unknown Mismatch (Risk Adjustment)
-                # If we are here, it's a mismatch we don't recognize.
-                # Don't panic (Score 100), but be suspicious (Score 40).
                 return {
                     "feature_name": FEATURE_NAME,
-                    "score": 40,  # Lowered from 85 to prevent false positives
+                    "score": 40,
                     "weight": WEIGHT,
                     "error": False,
                     "message": f"unknown_hotlink_from_{icon_root}"

@@ -25,12 +25,11 @@ def extract(url: str, context: dict = None) -> dict:
 
         # 2. Perform DNS Lookup
         resolver = dns.resolver.Resolver()
-        resolver.lifetime = 3  # 3 second timeout to keep it fast
+        resolver.lifetime = 3  # 3 second timeout
 
         try:
             answers = resolver.resolve(hostname, 'A')
         except Exception:
-            # If DNS fails, we can't judge Fast Flux. Return Neutral.
             return {"feature_name": FEATURE_NAME, "score": 0, "weight": WEIGHT, "error": False, "message": "dns_resolution_failed"}
 
         ttl = answers.rrset.ttl
@@ -40,8 +39,6 @@ def extract(url: str, context: dict = None) -> dict:
         flags = []
 
         # CHECK 1: TTL Analysis
-        # Fast Flux networks need low TTL (0-180s) to rotate IPs quickly.
-        # Normal sites usually have 3600s or more.
         if ttl < 60:
             score += 80
             flags.append(f"critical_low_ttl_{ttl}s")
@@ -50,7 +47,6 @@ def extract(url: str, context: dict = None) -> dict:
             flags.append(f"suspicious_low_ttl_{ttl}s")
 
         # CHECK 2: Volume of IPs
-        # Returning 10+ IPs in a single query is distinctively "Fluxy" or CDN-like.
         if ip_count > 10:
             score += 30
             flags.append(f"mass_ip_rotation_{ip_count}_ips")
@@ -58,12 +54,13 @@ def extract(url: str, context: dict = None) -> dict:
             score += 10
             flags.append(f"high_ip_count_{ip_count}_ips")
 
-        # WHITELIST CHECK (CDN Protection)
-        # CDNs (Cloudflare, Akamai) use Fast-Flux techniques legally for load balancing.
-        # We must whitelist known giants to avoid False Positives.
+        # WHITELIST CHECK (Expanded for Registrars/Infrastructure)
         safe_domains = {
             'google', 'facebook', 'amazon', 'cloudflare', 'fastly',
-            'akamai', 'microsoft', 'apple', 'netflix'
+            'akamai', 'microsoft', 'apple', 'netflix',
+            '123-reg', 'godaddy', 'namecheap', 'wix', 'wordpress',
+            'herokuapp', 'github', 'gitlab', 'vercel', 'netlify',
+            'squarespace', 'weebly'
         }
 
         if ext.domain.lower() in safe_domains:
