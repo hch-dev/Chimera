@@ -1,7 +1,0 @@
-{
-  "tokenizer_type": "gpt2",
-  "bos_token": "<bos>",
-  "eos_token": "<eos>",
-  "pad_token": "<pad>",
-  "unk_token": "<unk>"
-}
