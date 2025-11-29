@@ -4,10 +4,10 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Load any pre-filled data from sessionStorage
     loadPrefilledData();
-    
+
     // Setup form validation
     setupFormValidation();
-    
+
     // Setup form submission
     setupFormSubmission();
 });
@@ -16,12 +16,12 @@ document.addEventListener('DOMContentLoaded', () => {
 function loadPrefilledData() {
     const reportUrl = sessionStorage.getItem('reportUrl');
     const reportEmail = sessionStorage.getItem('reportEmail');
-    
+
     if (reportUrl) {
         document.getElementById('reportUrl').value = reportUrl;
         sessionStorage.removeItem('reportUrl');
     }
-    
+
     if (reportEmail) {
         try {
             const emailData = JSON.parse(reportEmail);
@@ -41,7 +41,7 @@ function loadPrefilledData() {
 function setupFormValidation() {
     const form = document.getElementById('reportForm');
     const inputs = form.querySelectorAll('input, textarea, select');
-    
+
     // Real-time validation
     inputs.forEach(input => {
         input.addEventListener('blur', () => validateField(input));
@@ -51,7 +51,7 @@ function setupFormValidation() {
             }
         });
     });
-    
+
     // URL validation
     const urlInput = document.getElementById('reportUrl');
     urlInput.addEventListener('input', () => {
@@ -68,16 +68,16 @@ function setupFormValidation() {
 function validateField(field) {
     const value = field.value.trim();
     const fieldName = field.name;
-    
+
     // Clear previous errors
     clearFieldError(field);
-    
+
     // Required field validation
     if (field.hasAttribute('required') && !value) {
         showFieldError(field, 'This field is required');
         return false;
     }
-    
+
     // Specific field validations
     switch (fieldName) {
         case 'url':
@@ -86,14 +86,14 @@ function validateField(field) {
                 return false;
             }
             break;
-            
+
         case 'email':
             if (value && !isValidEmail(value)) {
                 showFieldError(field, 'Please enter a valid email address');
                 return false;
             }
             break;
-            
+
         case 'description':
             if (value.length < 10) {
                 showFieldError(field, 'Please provide at least 10 characters of description');
@@ -101,20 +101,20 @@ function validateField(field) {
             }
             break;
     }
-    
+
     return true;
 }
 
 // Show field error
 function showFieldError(field, message) {
     field.classList.add('error');
-    
+
     // Remove existing error message
     const existingError = field.parentNode.querySelector('.error-message');
     if (existingError) {
         existingError.remove();
     }
-    
+
     // Add error message
     const errorDiv = document.createElement('div');
     errorDiv.className = 'error-message';
@@ -134,56 +134,56 @@ function clearFieldError(field) {
 // Setup form submission
 function setupFormSubmission() {
     const form = document.getElementById('reportForm');
-    
+
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
+
         // Validate all fields
         const inputs = form.querySelectorAll('input, textarea, select');
         let isValid = true;
-        
+
         inputs.forEach(input => {
             if (!validateField(input)) {
                 isValid = false;
             }
         });
-        
+
         if (!isValid) {
             showNotification('Please correct the errors in the form', 'error');
             return;
         }
-        
+
         // Show loading state
         const submitBtn = form.querySelector('.submit-btn');
         const originalContent = submitBtn.innerHTML;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
         submitBtn.disabled = true;
-        
+
         // Collect form data
         const formData = new FormData(form);
         const reportData = {
             url: formData.get('url'),
-            type: formData.get('type'),
-            threatLevel: formData.get('threatLevel'),
-            description: formData.get('description'),
-            email: formData.get('email'),
-            evidence: formData.get('evidence'),
-            discoveryMethod: formData.get('discoveryMethod'),
-            timestamp: new Date().toISOString(),
-            id: Date.now()
+                          type: formData.get('type'),
+                          threatLevel: formData.get('threatLevel'),
+                          description: formData.get('description'),
+                          email: formData.get('email'),
+                          evidence: formData.get('evidence'),
+                          discoveryMethod: formData.get('discoveryMethod'),
+                          timestamp: new Date().toISOString(),
+                          id: Date.now()
         };
-        
+
         // Simulate submission
         setTimeout(() => {
             // Save report to localStorage
             saveReport(reportData);
-            
+
             // Show success message
             showSuccessMessage(reportData);
-            
+
             // Reset form
             resetForm();
-            
+
             // Restore button
             submitBtn.innerHTML = originalContent;
             submitBtn.disabled = false;
@@ -195,12 +195,12 @@ function setupFormSubmission() {
 function saveReport(reportData) {
     const existingReports = JSON.parse(localStorage.getItem('chimera_reports') || '[]');
     existingReports.unshift(reportData);
-    
+
     // Keep only last 100 reports
     if (existingReports.length > 100) {
         existingReports.splice(100);
     }
-    
+
     localStorage.setItem('chimera_reports', JSON.stringify(existingReports));
 }
 
@@ -208,53 +208,53 @@ function saveReport(reportData) {
 function showSuccessMessage(reportData) {
     // Hide form
     document.querySelector('.report-form-section').style.display = 'none';
-    
+
     // Show success message
     const successDiv = document.createElement('div');
     successDiv.className = 'success-message';
     successDiv.innerHTML = `
-        <div class="success-content">
-            <div class="success-icon">
-                <i class="fas fa-check-circle"></i>
-            </div>
-            <h2>Report Submitted Successfully!</h2>
-            <p>Thank you for helping keep the internet safe. Your report has been received and will be reviewed by our team.</p>
-            <div class="report-summary">
-                <h3>Report Summary:</h3>
-                <div class="summary-item">
-                    <strong>URL:</strong> ${reportData.url}
-                </div>
-                <div class="summary-item">
-                    <strong>Type:</strong> ${reportData.type}
-                </div>
-                <div class="summary-item">
-                    <strong>Threat Level:</strong> ${reportData.threatLevel}
-                </div>
-                <div class="summary-item">
-                    <strong>Report ID:</strong> #${reportData.id}
-                </div>
-            </div>
-            <div class="success-actions">
-                <button onclick="submitAnotherReport()" class="btn btn-primary">
-                    <i class="fas fa-plus"></i>
-                    Submit Another Report
-                </button>
-                <a href="reports.html" class="btn btn-secondary">
-                    <i class="fas fa-chart-bar"></i>
-                    View Dashboard
-                </a>
-                <a href="index.html" class="btn btn-outline">
-                    <i class="fas fa-home"></i>
-                    Return Home
-                </a>
-            </div>
-        </div>
+    <div class="success-content">
+    <div class="success-icon">
+    <i class="fas fa-check-circle"></i>
+    </div>
+    <h2>Report Submitted Successfully!</h2>
+    <p>Thank you for helping keep the internet safe. Your report has been received and will be reviewed by our team.</p>
+    <div class="report-summary">
+    <h3>Report Summary:</h3>
+    <div class="summary-item">
+    <strong>URL:</strong> ${reportData.url}
+    </div>
+    <div class="summary-item">
+    <strong>Type:</strong> ${reportData.type}
+    </div>
+    <div class="summary-item">
+    <strong>Threat Level:</strong> ${reportData.threatLevel}
+    </div>
+    <div class="summary-item">
+    <strong>Report ID:</strong> #${reportData.id}
+    </div>
+    </div>
+    <div class="success-actions">
+    <button onclick="submitAnotherReport()" class="btn btn-primary">
+    <i class="fas fa-plus"></i>
+    Submit Another Report
+    </button>
+    <a href="reports.html" class="btn btn-secondary">
+    <i class="fas fa-chart-bar"></i>
+    View Dashboard
+    </a>
+    <a href="index.html" class="btn btn-outline">
+    <i class="fas fa-home"></i>
+    Return Home
+    </a>
+    </div>
+    </div>
     `;
-    
+
     // Insert after header
     const header = document.querySelector('.report-header');
     header.parentNode.insertBefore(successDiv, header.nextSibling);
-    
+
     // Scroll to success message
     successDiv.scrollIntoView({ behavior: 'smooth' });
 }
@@ -266,10 +266,10 @@ function submitAnotherReport() {
     if (successMessage) {
         successMessage.remove();
     }
-    
+
     // Show form
     document.querySelector('.report-form-section').style.display = 'block';
-    
+
     // Scroll to form
     document.querySelector('.report-form-section').scrollIntoView({ behavior: 'smooth' });
 }
@@ -278,7 +278,7 @@ function submitAnotherReport() {
 function resetForm() {
     const form = document.getElementById('reportForm');
     form.reset();
-    
+
     // Clear all field errors
     const inputs = form.querySelectorAll('input, textarea, select');
     inputs.forEach(input => clearFieldError(input));
@@ -786,41 +786,41 @@ const reportCSS = `
     .report-header h1 {
         font-size: 2rem;
     }
-    
+
     .form-card {
         padding: 2rem 1.5rem;
     }
-    
+
     .threat-option {
         flex-direction: column;
         text-align: center;
         gap: 0.75rem;
     }
-    
+
     .threat-label {
         min-width: auto;
     }
-    
+
     .form-actions {
         flex-direction: column;
     }
-    
+
     .form-actions .btn {
         width: 100%;
     }
-    
+
     .reports-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .impact-grid {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     .success-actions {
         flex-direction: column;
     }
-    
+
     .success-actions .btn {
         width: 100%;
     }
