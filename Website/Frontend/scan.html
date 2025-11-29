@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>URL Phishing Scanner - Chimera</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -25,7 +22,7 @@
                 </ul>
                 <div class="nav-actions">
                     <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
-                    <a href="login.html" class="btn btn-outline btn-sm">Login</a>
+                    <a href="login.html" class="btn btn-outline">Login</a>
                 </div>
             </div>
         </nav>
@@ -63,28 +60,23 @@
                 <div class="loading-card">
                     <h3 class="pulsing-text">Scanning URL...</h3>
                     <p>Analyzing security patterns and checking against threat databases</p>
-                    <div class="progress-bar">
-                        <div class="progress-fill"></div>
-                    </div>
+                    <div class="progress-bar"><div class="progress-fill"></div></div>
                 </div>
             </section>
 
             <section id="resultsSection" class="results-section" style="display: none;">
 
                 <div class="risk-score-card">
-
                     <div class="risk-col-left">
                         <h2 class="risk-title">Verdict</h2>
                         <div id="riskBadge" class="risk-badge">
                             <span id="riskLevel">Safe</span>
                         </div>
                     </div>
-
                     <div class="risk-col-center">
                         <h3 class="action-title">Recommended Actions</h3>
                         <div id="recommendationsList" class="recommendations-list-compact"></div>
                     </div>
-
                     <div class="risk-col-right">
                         <div class="score-circle">
                             <div class="score-text-wrapper">
@@ -98,7 +90,6 @@
                 <div class="analysis-details">
                     <h3>Security Analysis</h3>
                     <div class="analysis-grid">
-
                         <div class="analysis-item" id="card-ssl">
                             <div class="analysis-icon"><i class="fas fa-lock"></i></div>
                             <div class="analysis-content"><h4>SSL Certificate</h4><p id="sslStatus">...</p></div>
@@ -151,17 +142,12 @@
                             <div class="analysis-icon"><i class="fas fa-folder-open"></i></div>
                             <div class="analysis-content"><h4>Path Analysis</h4><p id="pathStatus">...</p></div>
                         </div>
-
                     </div>
                 </div>
 
                 <div class="action-buttons">
-                    <button onclick="scanAnother()" class="btn btn-secondary">
-                        <i class="fas fa-redo"></i> Scan Another
-                    </button>
-                    <button onclick="reportSuspicious()" class="btn btn-outline">
-                        <i class="fas fa-flag"></i> Report Site
-                    </button>
+                    <button onclick="scanAnother()" class="btn btn-secondary"><i class="fas fa-redo"></i> Scan Another</button>
+                    <button onclick="reportSuspicious()" class="btn btn-outline"><i class="fas fa-flag"></i> Report Site</button>
                 </div>
             </section>
         </div>
@@ -169,39 +155,8 @@
 
     <footer class="footer">
         <div class="container">
-            <div class="footer-content">
-                <div class="footer-brand">
-                    <div class="logo"><span>Chimera</span></div>
-                    <p>Smart Phishing Detection & Prevention</p>
-                </div>
-                <div class="footer-links">
-                    <div class="link-group">
-                        <h4>Product</h4>
-                        <ul>
-                            <li><a href="scan.html">URL Scanner</a></li>
-                            <li><a href="email-check.html">Email Checker</a></li>
-                            <li><a href="reports.html">Reports Dashboard</a></li>
-                        </ul>
-                    </div>
-                    <div class="link-group">
-                        <h4>Resources</h4>
-                        <ul>
-                            <li><a href="learn.html">Awareness Hub</a></li>
-                            <li><a href="report.html">Report Suspicious Site</a></li>
-                            <li><a href="contact.html">Contact Support</a></li>
-                        </ul>
-                    </div>
-                    <div class="link-group">
-                        <h4>Connect</h4>
-                        <div class="social-links">
-                            <a href="#"><i class="fab fa-github"></i></a>
-                            <a href="#"><i class="fab fa-linkedin"></i></a>
-                        </div>
-                    </div>
-                </div>
-            </div>
             <div class="footer-bottom">
-                <p>&copy; 2025 Chimera. All rights reserved.</p>
+                <p>&copy; 2025 Chimera. Smart Phishing Detection.</p>
             </div>
         </div>
     </footer>
