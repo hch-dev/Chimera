@@ -1,10 +1,6 @@
-// Scanner Page Specific JavaScript
-
-// CONFIGURATION
-const API_URL = "http://127.0.0.1:8000/scan"; // Your FastAPI Backend
+const API_URL = "http://127.0.0.1:8000/scan";
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Check for URL from homepage session
     const urlFromSession = sessionStorage.getItem('scanUrl');
     if (urlFromSession) {
         document.getElementById('urlInput').value = urlFromSession;
@@ -12,11 +8,15 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => performScan(), 500);
     }
 
-    // Setup event listeners
-    document.getElementById('scanBtn').addEventListener('click', performScan);
-    document.getElementById('urlInput').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') performScan();
-    });
+    const scanBtn = document.getElementById('scanBtn');
+    const urlInput = document.getElementById('urlInput');
+
+    if (scanBtn) scanBtn.addEventListener('click', performScan);
+    if (urlInput) {
+        urlInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') performScan();
+        });
+    }
 });
 
 function setExampleUrl(url) {
@@ -28,77 +28,50 @@ async function performScan() {
     const urlInput = document.getElementById('urlInput');
     const url = urlInput.value.trim();
 
-    if (!url) {
-        showNotification('Please enter a URL to scan', 'warning');
+    if (!url || !isValidURL(url)) {
+        alert('Please enter a valid URL');
         return;
     }
 
-    // Basic Validation
-    if (!isValidURL(url)) {
-        showNotification('Please enter a valid URL (e.g., https://example.com)', 'error');
-        return;
-    }
-
-    // UI: Switch to Loading State
+    // UI State: Loading
     document.querySelector('.url-input-section').style.display = 'none';
     document.getElementById('loadingSection').style.display = 'block';
     document.getElementById('resultsSection').style.display = 'none';
 
-    // Progress Bar Animation (Visual feedback)
-    const progressFill = document.querySelector('.progress-fill');
-    progressFill.style.width = '0%';
-
-    let progress = 0;
-    const progressInterval = setInterval(() => {
-        if (progress < 90) {
-            progress += Math.random() * 15;
-            if (progress > 90) progress = 90;
-            progressFill.style.width = progress + '%';
-        }
-    }, 200);
-
     try {
-        // --- REAL BACKEND CALL ---
-        console.log("🚀 Sending request to Chimera Backend:", url);
-
         const response = await fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ url: url })
         });
 
-        if (!response.ok) throw new Error(`Server Error: ${response.status}`);
+        if (!response.ok) throw new Error("Server Error");
 
         const backendData = await response.json();
-        console.log("✅ Backend Response:", backendData);
 
-        // Finish Animation
-        clearInterval(progressInterval);
-        progressFill.style.width = '100%';
-
-        // Process and Show Results
+        // Simulate tiny delay for smoother transition
         setTimeout(() => {
             const uiData = mapBackendToUI(backendData, url);
-            saveScanToHistory(uiData); // Save for Reports page
             showResults(uiData);
-        }, 500);
+            document.getElementById('loadingSection').style.display = 'none';
+        }, 800);
 
     } catch (error) {
-        clearInterval(progressInterval);
-        console.error("Scan Failed:", error);
-
-        // Revert UI on error
+        console.error(error);
         document.querySelector('.url-input-section').style.display = 'block';
         document.getElementById('loadingSection').style.display = 'none';
-
-        showNotification('Error connecting to Chimera Engine. Is the backend running?', 'error');
+        alert('Backend not reachable. Ensure server.py is running.');
     }
 }
 
-// ADAPTER: Convert Python JSON -> Frontend UI Object
-function mapBackendToUI(data, originalUrl) {
-    // Backend returns: { verdict: "PHISHING", confidence: 95.0, details: {...} }
+// FORMATTER
+function formatText(text) {
+    if (!text) return "Unknown";
+    return text.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+    .replace(/Ssl/g, "SSL").replace(/Url/g, "URL");
+}
 
+function mapBackendToUI(data, originalUrl) {
     const isPhishing = data.verdict === "PHISHING";
     const isSuspicious = data.verdict === "SUSPICIOUS";
 
@@ -113,97 +86,94 @@ function mapBackendToUI(data, originalUrl) {
         riskClass = 'warning';
     }
 
-    // Extract key details for display
-    const details = data.details || {};
-    const sslMsg = details.ssl_presence_and_validity?.message || 'Valid';
-    const ageMsg = details.domain_age_analysis?.message || 'Established';
+    const d = data.details || {};
+    const getMsg = (key) => d[key]?.message || 'Clean';
 
-    // Find the "Smoking Gun" (highest risk feature)
-    let topThreat = "None detected";
-    if (isPhishing || isSuspicious) {
-        for (const key in details) {
-            if (details[key].score > 50) {
-                topThreat = details[key].message;
-                break;
-            }
-        }
-    }
+    let finalScore = Math.round(data.confidence) || 0;
+    let safetyScore = 100 - finalScore;
+    if (safetyScore < 0) safetyScore = 0;
 
     return {
         url: originalUrl,
-        domain: new URL(originalUrl).hostname,
-        riskScore: Math.round(data.confidence), // Ensure integer
+        riskScore: safetyScore,
+        rawRisk: finalScore,
         riskLevel: riskLevel,
         riskClass: riskClass,
-        confidence: Math.round(data.confidence),
 
-        // Map specific features from backend details
-        ssl: sslMsg,
-        domainAge: ageMsg,
-        suspiciousPatterns: topThreat,
-        maliciousKeywords: details.obfuscation_analysis?.message || 'None',
-        redirectBehavior: details.open_redirect_detection?.message || 'Clean',
-        blacklistStatus: details.threat_intelligence?.message || 'Clean'
+        ssl: formatText(getMsg('ssl_presence_and_validity')),
+        domainAge: formatText(getMsg('domain_age_analysis')),
+        suspiciousPatterns: formatText(getMsg('homoglyph_impersonation')),
+        maliciousKeywords: formatText(getMsg('obfuscation_analysis')),
+        redirectBehavior: formatText(getMsg('open_redirect_detection')),
+        blacklistStatus: formatText(getMsg('threat_intelligence'))
     };
 }
 
-// --- UI UPDATE FUNCTIONS ---
-
 function showResults(results) {
-    updateRiskDisplay(results);
-    updateAnalysisDetails(results);
-    updateRecommendations(results);
-    document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
-}
-
-function updateRiskDisplay(results) {
+    // 1. Risk Badge
     const riskBadge = document.getElementById('riskBadge');
+    const icon = results.riskClass === 'safe' ? 'fa-check-circle' : 'fa-exclamation-triangle';
     riskBadge.className = `risk-badge ${results.riskClass}`;
-    document.getElementById('riskLevel').textContent = results.riskLevel;
+    riskBadge.innerHTML = `<i class="fas ${icon}"></i> ${results.riskLevel} Risk`;
 
-    // Badge Icon
-    const iconClass = results.riskClass === 'safe' ? 'fa-shield-check' :
-    results.riskClass === 'warning' ? 'fa-exclamation-triangle' :
-    'fa-shield-virus';
-    riskBadge.querySelector('i').className = `fas ${iconClass}`;
-
-    // Score Circle
+    // 2. Score Circle
     document.getElementById('scoreValue').textContent = results.riskScore;
     document.getElementById('threatLevel').textContent = results.riskLevel;
-    document.getElementById('confidenceLevel').textContent = results.confidence + '%';
 
-    // Color the circle ring
+    // Removed Confidence Level assignment here as requested
+
     const circle = document.querySelector('.score-circle');
-    if (results.riskClass === 'danger') {
-        circle.style.background = 'linear-gradient(135deg, #dc3545, #c82333)';
-    } else if (results.riskClass === 'warning') {
-        circle.style.background = 'linear-gradient(135deg, #ffc107, #fd7e14)';
-    } else {
-        circle.style.background = 'var(--gradient-primary)';
-    }
+    let color = '#28a745'; // Green
+    if (results.riskClass === 'warning') color = '#ffc107';
+    if (results.riskClass === 'danger') color = '#dc3545';
+    if (circle) circle.style.background = `conic-gradient(${color} ${results.riskScore}%, var(--bg-tertiary) 0)`;
+
+    // 3. Analysis Details (With Filtering Logic)
+    updateAnalysisGrid(results);
+
+    // 4. Recommendations
+    updateRecommendations(results);
+
+    document.getElementById('resultsSection').style.display = 'block';
 }
 
-function updateAnalysisDetails(results) {
-    const format = (text, elementId) => {
-        const el = document.getElementById(elementId);
-        el.textContent = text || 'Not Available';
-        if (text && (text.includes('detected') || text.includes('MISMATCH') || text.includes('CRITICAL') || text.includes('invalid'))) {
-            el.style.color = 'var(--danger-color)';
+function updateAnalysisGrid(results) {
+    // Helper to determine if a specific text indicates a problem
+    const isBad = (text) => {
+        const t = text.toLowerCase();
+        return t.includes('invalid') || t.includes('missing') || t.includes('detected') ||
+        t.includes('found') || t.includes('mismatch') || t.includes('high');
+    };
+
+    // Helper to update text and visibility
+    const updateCard = (cardId, textId, text) => {
+        const card = document.getElementById(cardId);
+        const p = document.getElementById(textId);
+
+        if (!card || !p) return;
+
+        p.textContent = text;
+
+        // Color logic
+        const bad = isBad(text);
+        p.className = bad ? 'text-danger' : 'text-success';
+
+        // VISIBILITY LOGIC (Change #4)
+        // If site is SAFE: Show everything (so user sees why it's safe)
+        // If site is PHISHING/WARNING: Hide the "Safe" cards, only show the "Bad" cards.
+        if (results.riskClass !== 'safe' && !bad) {
+            card.style.display = 'none'; // Hide good news on a bad site
         } else {
-            el.style.color = 'var(--text-secondary)';
+            card.style.display = 'flex'; // Show otherwise
         }
     };
 
-    format(results.ssl, 'sslStatus');
-    format(results.domainAge, 'domainAge');
-    format(results.suspiciousPatterns, 'suspiciousPatterns');
-    format(results.maliciousKeywords, 'maliciousKeywords');
-    format(results.redirectBehavior, 'redirectBehavior');
-    format(results.blacklistStatus, 'blacklistStatus');
-
-    document.querySelectorAll('.status-indicator').forEach(dot => {
-        dot.className = `status-indicator ${results.riskClass}`;
-    });
+    updateCard('card-ssl', 'sslStatus', results.ssl);
+    updateCard('card-age', 'domainAge', results.domainAge);
+    updateCard('card-patterns', 'suspiciousPatterns', results.suspiciousPatterns);
+    updateCard('card-keywords', 'maliciousKeywords', results.maliciousKeywords);
+    updateCard('card-redirects', 'redirectBehavior', results.redirectBehavior);
+    updateCard('card-blacklist', 'blacklistStatus', results.blacklistStatus);
 }
 
 function updateRecommendations(results) {
@@ -212,71 +182,32 @@ function updateRecommendations(results) {
 
     if (results.riskClass === 'safe') {
         items = [
-            { type: 'safe', icon: 'fa-check-circle', text: 'This URL appears safe based on our heuristic analysis.' },
-            { type: 'info', icon: 'fa-lock', text: 'SSL Certificate is valid and domain is established.' }
-        ];
-    } else if (results.riskClass === 'warning') {
-        items = [
-            { type: 'warning', icon: 'fa-exclamation-triangle', text: 'Proceed with caution. Suspicious patterns detected.' },
-            { type: 'info', icon: 'fa-search', text: 'Check the URL carefully for typos or hidden redirects.' }
+            { type: 'safe', icon: 'fa-check-circle', text: 'This URL appears safe.' },
+            { type: 'info', icon: 'fa-lock', text: 'SSL is valid and domain is established.' }
         ];
     } else {
         items = [
             { type: 'danger', icon: 'fa-ban', text: 'CRITICAL THREAT: Do not visit this link.' },
-            { type: 'danger', icon: 'fa-user-secret', text: 'High confidence of Phishing or Malware.' },
-            { type: 'warning', icon: 'fa-flag', text: 'We recommend reporting this URL immediately.' }
+            { type: 'danger', icon: 'fa-user-secret', text: 'Phishing indicators found.' }
         ];
     }
 
     list.innerHTML = items.map(item => `
     <div class="recommendation-item ${item.type}">
-    <i class="fas ${item.icon}"></i>
-    <span>${item.text}</span>
+    <i class="fas ${item.icon}"></i> <span>${item.text}</span>
     </div>
     `).join('');
 }
 
-// Save scan to LocalStorage
-function saveScanToHistory(analysis) {
-    const historyItem = {
-        id: Date.now(),
-        date: new Date().toISOString(),
-        type: 'URL',
-        target: analysis.url,
-        riskLevel: analysis.riskLevel,
-        riskClass: analysis.riskClass,
-        score: analysis.riskScore,
-        details: `${analysis.suspiciousPatterns} | ${analysis.ssl}`
-    };
-
-    const existing = JSON.parse(localStorage.getItem('chimera_scans') || '[]');
-    existing.unshift(historyItem);
-    localStorage.setItem('chimera_scans', JSON.stringify(existing.slice(0, 50)));
-}
-
 function scanAnother() {
-    document.getElementById('urlInput').value = '';
     document.querySelector('.url-input-section').style.display = 'block';
     document.getElementById('resultsSection').style.display = 'none';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.getElementById('urlInput').value = '';
 }
 
 function reportSuspicious() {
-    const url = document.getElementById('urlInput').value;
-    sessionStorage.setItem('reportUrl', url);
     window.location.href = 'report.html';
 }
 
-function exportReport() {
-    showNotification('Export feature coming soon for live scans!', 'info');
-}
-
-// Utility
-function isValidURL(string) {
-    try {
-        new URL(string);
-        return true;
-    } catch (_) {
-        return false;
-    }
-}
+function saveScanToHistory(data) {} // Implemented in reports page
+function isValidURL(str) { try { new URL(str); return true; } catch{ return false; } }
