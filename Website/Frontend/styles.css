@@ -2893,3 +2893,248 @@ line-height: 1;
     .risk-score-display {
         flex-direction: column;
         gap: 1.5
+
+        /* ... [KEEP ALL CSS ABOVE "DASHBOARD RESULTS" SECTION] ... */
+
+        /* --- DASHBOARD RESULTS (3-COLUMN LAYOUT) --- */
+        .results-section {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding-bottom: 4rem;
+        }
+
+        /* The Top Card Container */
+        .risk-score-card {
+            background: var(--bg-secondary);
+            border-radius: var(--border-radius);
+            padding: 0; /* Remove padding here, use inner containers */
+            border: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-lg);
+            display: grid;
+            grid-template-columns: 1fr 1.5fr 1fr; /* 3 Columns: Left, Middle (Wider), Right */
+            overflow: hidden;
+        }
+
+        /* Column 1: Left (Verdict) */
+        .risk-col-left {
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-right: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .risk-title {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Column 2: Center (Actions) */
+        .risk-col-center {
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .action-title {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Compact Action Items for Header */
+        .recommendations-list-compact {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .rec-item-compact {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-weight: 500;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+        }
+
+        .rec-item-compact i {
+            font-size: 1.1rem;
+        }
+        .rec-item-compact.danger i { color: #dc3545; }
+        .rec-item-compact.safe i { color: #28a745; }
+        .rec-item-compact.warning i { color: #ffc107; }
+
+        /* Column 3: Right (Score) */
+        .risk-col-right {
+            padding: 2.5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-left: 1px solid var(--border-color);
+        }
+
+        /* Reused Badge & Circle Styles */
+        .risk-badge {
+            padding: 0.6rem 1.8rem;
+            border-radius: 50px;
+            font-weight: 800;
+            text-transform: uppercase;
+            font-size: 1.2rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .risk-badge.safe { background: rgba(40, 167, 69, 0.15); color: #28a745; border: 1px solid #28a745; }
+        .risk-badge.warning { background: rgba(255, 193, 7, 0.15); color: #ffc107; border: 1px solid #ffc107; }
+        .risk-badge.danger { background: rgba(220, 53, 69, 0.15); color: #dc3545; border: 1px solid #dc3545; }
+
+        .score-circle {
+            position: relative;
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            background: conic-gradient(var(--primary-color) 0%, var(--bg-tertiary) 0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .score-circle::after {
+            content: '';
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: var(--bg-secondary);
+            border-radius: 50%;
+        }
+
+        .score-text-wrapper {
+            position: absolute;
+            z-index: 2;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #scoreValue {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        line-height: 1;
+        }
+
+        .score-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        /* Analysis Grid & Rest */
+        .analysis-details {
+            background: var(--bg-secondary);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-md);
+        }
+
+        .analysis-details h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+        }
+
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .analysis-item {
+            background: var(--bg-primary);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            transition: transform 0.2s ease;
+        }
+
+        .analysis-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .d-none { display: none !important; }
+
+        .analysis-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+            font-size: 1.25rem;
+            border: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        .analysis-content h4 {
+            margin: 0 0 0.4rem 0;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .analysis-content p {
+            margin: 0;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 1.05rem;
+        }
+
+        .text-danger { color: #ff4d4d !important; }
+        .text-success { color: #28a745 !important; }
+        .text-warning { color: #ffc107 !important; }
+
+        /* Buttons */
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 3rem;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 900px) {
+            .risk-score-card {
+                grid-template-columns: 1fr; /* Stack vertically on tablet/mobile */
+                gap: 0;
+            }
+
+            .risk-col-left, .risk-col-center, .risk-col-right {
+                border: none;
+                border-bottom: 1px solid var(--border-color);
+                padding: 2rem;
+            }
+
+            .risk-col-right { border-bottom: none; }
+        }

@@ -72,23 +72,24 @@
             <section id="resultsSection" class="results-section" style="display: none;">
 
                 <div class="risk-score-card">
-                    <div class="risk-score-header">
-                        <h2>Risk Assessment</h2>
+
+                    <div class="risk-col-left">
+                        <h2 class="risk-title">Verdict</h2>
                         <div id="riskBadge" class="risk-badge">
                             <span id="riskLevel">Safe</span>
                         </div>
                     </div>
-                    <div class="risk-score-display">
+
+                    <div class="risk-col-center">
+                        <h3 class="action-title">Recommended Actions</h3>
+                        <div id="recommendationsList" class="recommendations-list-compact"></div>
+                    </div>
+
+                    <div class="risk-col-right">
                         <div class="score-circle">
                             <div class="score-text-wrapper">
                                 <span id="scoreValue">--</span>
-                                <span class="score-label">Safety Score</span>
-                            </div>
-                        </div>
-                        <div class="score-details">
-                            <div class="score-item">
-                                <span class="score-label">Threat Level</span>
-                                <span id="threatLevel" class="score-value">Low</span>
+                                <span class="score-label">Safety</span>
                             </div>
                         </div>
                     </div>
@@ -154,11 +155,6 @@
                     </div>
                 </div>
 
-                <div class="recommendations-card">
-                    <h3>Safety Recommendations</h3>
-                    <div id="recommendationsList" class="recommendations-list"></div>
-                </div>
-
                 <div class="action-buttons">
                     <button onclick="scanAnother()" class="btn btn-secondary">
                         <i class="fas fa-redo"></i> Scan Another
@@ -175,9 +171,7 @@
         <div class="container">
             <div class="footer-content">
                 <div class="footer-brand">
-                    <div class="logo">
-                        <span>Chimera</span>
-                    </div>
+                    <div class="logo"><span>Chimera</span></div>
                     <p>Smart Phishing Detection & Prevention</p>
                 </div>
                 <div class="footer-links">
