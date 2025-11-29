@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Suspicious Site - Chimera</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header Navigation -->
+    <header class="header">
+        <nav class="nav">
+            <div class="nav-container">
+                <div class="logo">
+                    <span>Chimera</span>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="scan.html">URL Scanner</a></li>
+                    <li><a href="email-check.html">Email Checker</a></li>
+                    <li><a href="learn.html">Awareness Hub</a></li>
+                    <li><a href="report.html" class="active">Report Suspicious Site</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+                <div class="nav-actions">
+                    <button class="theme-toggle" id="themeToggle">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <a href="login.html" class="btn btn-outline btn-sm">Login</a>
+                </div>
+                <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Report Section -->
+    <main class="report-main">
+        <div class="container">
+            <div class="report-header">
+                <h1>Report Suspicious Website</h1>
+                <p>Help protect the community by reporting malicious or phishing websites</p>
+            </div>
+
+            <!-- Report Form -->
+            <section class="report-form-section">
+                <div class="form-card">
+                    <form id="reportForm">
+                        <!-- URL Input -->
+                        <div class="form-group">
+                            <label for="reportUrl">Suspicious URL *</label>
+                            <input type="url" id="reportUrl" name="url" required 
+                                   placeholder="https://suspicious-website.com" 
+                                   class="form-input">
+                            <small class="form-help">Enter the full URL including http:// or https://</small>
+                        </div>
+
+                        <!-- Report Type -->
+                        <div class="form-group">
+                            <label for="reportType">Report Type *</label>
+                            <select id="reportType" name="type" required class="form-select">
+                                <option value="">Select report type...</option>
+                                <option value="phishing">Phishing Website</option>
+                                <option value="scam">Scam or Fraud</option>
+                                <option value="malware">Malware Distribution</option>
+                                <option value="fake">Fake Website/Impersonation</option>
+                                <option value="spam">Spam or Unwanted Content</option>
+                                <option value="other">Other Threat</option>
+                            </select>
+                        </div>
+
+                        <!-- Threat Level -->
+                        <div class="form-group">
+                            <label>Threat Level *</label>
+                            <div class="threat-levels">
+                                <label class="threat-option">
+                                    <input type="radio" name="threatLevel" value="low" required>
+                                    <span class="threat-indicator low"></span>
+                                    <span class="threat-label">Low Risk</span>
+                                    <span class="threat-desc">Suspicious but not clearly malicious</span>
+                                </label>
+                                <label class="threat-option">
+                                    <input type="radio" name="threatLevel" value="medium" required>
+                                    <span class="threat-indicator medium"></span>
+                                    <span class="threat-label">Medium Risk</span>
+                                    <span class="threat-desc">Likely malicious or deceptive</span>
+                                </label>
+                                <label class="threat-option">
+                                    <input type="radio" name="threatLevel" value="high" required>
+                                    <span class="threat-indicator high"></span>
+                                    <span class="threat-label">High Risk</span>
+                                    <span class="threat-desc">Clearly dangerous or harmful</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="form-group">
+                            <label for="description">Description *</label>
+                            <textarea id="description" name="description" required 
+                                      placeholder="Please describe what makes this website suspicious..." 
+                                      class="form-textarea" rows="4"></textarea>
+                            <small class="form-help">Include details about suspicious content, behavior, or why you believe it's malicious</small>
+                        </div>
+
+                        <!-- Additional Information -->
+                        <div class="form-section">
+                            <h3>Additional Information (Optional)</h3>
+                            
+                            <!-- Email -->
+                            <div class="form-group">
+                                <label for="reporterEmail">Your Email</label>
+                                <input type="email" id="reporterEmail" name="email" 
+                                       placeholder="your.email@example.com" 
+                                       class="form-input">
+                                <small class="form-help">Optional: Provide if you'd like updates about your report</small>
+                            </div>
+
+                            <!-- Evidence -->
+                            <div class="form-group">
+                                <label for="evidence">Evidence or Screenshots</label>
+                                <textarea id="evidence" name="evidence" 
+                                          placeholder="Paste any additional evidence, error messages, or observations..." 
+                                          class="form-textarea" rows="3"></textarea>
+                            </div>
+
+                            <!-- How did you find it -->
+                            <div class="form-group">
+                                <label for="discoveryMethod">How did you discover this site?</label>
+                                <select id="discoveryMethod" name="discoveryMethod" class="form-select">
+                                    <option value="">Select method...</option>
+                                    <option value="email">Email/Phishing attempt</option>
+                                    <option value="search">Search engine results</option>
+                                    <option value="social">Social media link</option>
+                                    <option value="ad">Advertisement</option>
+                                    <option value="direct">Direct navigation/typo</option>
+                                    <option value="other">Other way</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Verification -->
+                        <div class="form-group">
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="verification" name="verification" required>
+                                <label for="verification" class="checkbox-text">I confirm that this report is accurate and to the best of my knowledge</label>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary submit-btn">
+                                <i class="fas fa-flag"></i>
+                                Submit Report
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                                <i class="fas fa-eraser"></i>
+                                Clear Form
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Recent Reports -->
+            <section class="recent-reports">
+                <div class="section-header">
+                    <h2>Recent Community Reports</h2>
+                    <p>See what threats the community has recently reported</p>
+                </div>
+
+                <div class="reports-grid">
+                    <div class="report-item">
+                        <div class="report-header">
+                            <span class="report-type phishing">Phishing</span>
+                            <span class="report-date">2 hours ago</span>
+                        </div>
+                        <div class="report-content">
+                            <h4>Fake Banking Website</h4>
+                            <p class="report-url">https://secure-bank-login.com</p>
+                            <p class="report-desc">Impersonating major bank, asking for login credentials and personal information</p>
+                            <div class="report-meta">
+                                <span class="threat-level high">High Risk</span>
+                                <span class="report-status">Under Review</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="report-item">
+                        <div class="report-header">
+                            <span class="report-type scam">Scam</span>
+                            <span class="report-date">5 hours ago</span>
+                        </div>
+                        <div class="report-content">
+                            <h4>Investment Scam</h4>
+                            <p class="report-url">https://crypto-quick-profits.com</p>
+                            <p class="report-desc">Promising unrealistic returns on cryptocurrency investments</p>
+                            <div class="report-meta">
+                                <span class="threat-level high">High Risk</span>
+                                <span class="report-status">Confirmed</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="report-item">
+                        <div class="report-header">
+                            <span class="report-type malware">Malware</span>
+                            <span class="report-date">1 day ago</span>
+                        </div>
+                        <div class="report-content">
+                            <h4>Malicious Download Site</h4>
+                            <p class="report-url">http://free-software-downloads.net</p>
+                            <p class="report-desc">Distributing malware disguised as legitimate software downloads</p>
+                            <div class="report-meta">
+                                <span class="threat-level high">High Risk</span>
+                                <span class="report-status">Blocked</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="report-item">
+                        <div class="report-header">
+                            <span class="report-type fake">Fake</span>
+                            <span class="report-date">2 days ago</span>
+                        </div>
+                        <div class="report-content">
+                            <h4>Brand Impersonation</h4>
+                            <p class="report-url">https://amazon-deals-today.com</p>
+                            <p class="report-desc">Fake Amazon site with counterfeit products and payment scams</p>
+                            <div class="report-meta">
+                                <span class="threat-level medium">Medium Risk</span>
+                                <span class="report-status">Under Review</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="report-item">
+                        <div class="report-header">
+                            <span class="report-type phishing">Phishing</span>
+                            <span class="report-date">3 days ago</span>
+                        </div>
+                        <div class="report-content">
+                            <h4>Email Phishing Link</h4>
+                            <p class="report-url">https://microsoft-account-verify.com</p>
+                            <p class="report-desc">Received via email claiming Microsoft account security issue</p>
+                            <div class="report-meta">
+                                <span class="threat-level high">High Risk</span>
+                                <span class="report-status">Confirmed</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="report-item">
+                        <div class="report-header">
+                            <span class="report-type spam">Spam</span>
+                            <span class="report-date">4 days ago</span>
+                        </div>
+                        <div class="report-content">
+                            <h4>Unsolicited Commercial Site</h4>
+                            <p class="report-url">https://quick-cash-loans.com</p>
+                            <p class="report-desc">Aggressive loan offers with suspicious terms and conditions</p>
+                            <div class="report-meta">
+                                <span class="threat-level low">Low Risk</span>
+                                <span class="report-status">Under Review</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Impact Statistics -->
+            <section class="impact-stats">
+                <div class="stats-header">
+                    <h2>Community Impact</h2>
+                    <p>See how your reports help protect others</p>
+                </div>
+
+                <div class="impact-grid">
+                    <div class="impact-card">
+                        <div class="impact-icon">
+                            <i class="fas fa-flag"></i>
+                        </div>
+                        <div class="impact-content">
+                            <div class="impact-number">1,247</div>
+                            <div class="impact-label">Reports This Month</div>
+                        </div>
+                    </div>
+
+                    <div class="impact-card">
+                        <div class="impact-icon">
+                            <i class="fas fa-shield-virus"></i>
+                        </div>
+                        <div class="impact-content">
+                            <div class="impact-number">892</div>
+                            <div class="impact-label">Threats Blocked</div>
+                        </div>
+                    </div>
+
+                    <div class="impact-card">
+                        <div class="impact-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="impact-content">
+                            <div class="impact-number">45,000+</div>
+                            <div class="impact-label">Users Protected</div>
+                        </div>
+                    </div>
+
+                    <div class="impact-card">
+                        <div class="impact-icon">
+                            <i class="fas fa-globe"></i>
+                        </div>
+                        <div class="impact-content">
+                            <div class="impact-number">127</div>
+                            <div class="impact-label">Countries</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="logo">
+                        <span>Chimera</span>
+                    </div>
+                    <p>Smart Phishing Detection & Prevention</p>
+                </div>
+                <div class="footer-links">
+                    <div class="link-group">
+                        <h4>Product</h4>
+                        <ul>
+                            <li><a href="scan.html">URL Scanner</a></li>
+                            <li><a href="email-check.html">Email Checker</a></li>
+                            <li><a href="reports.html">Reports Dashboard</a></li>
+                        </ul>
+                    </div>
+                    <div class="link-group">
+                        <h4>Resources</h4>
+                        <ul>
+                            <li><a href="learn.html">Awareness Hub</a></li>
+                            <li><a href="report.html">Report Suspicious Site</a></li>
+                            <li><a href="contact.html">Contact Support</a></li>
+                        </ul>
+                    </div>
+                    <div class="link-group">
+                        <h4>Connect</h4>
+                        <div class="social-links">
+                            <a href="#"><i class="fab fa-github"></i></a>
+                            <a href="#"><i class="fab fa-linkedin"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Chimera. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="report.js"></script>
+</body>
+</html>

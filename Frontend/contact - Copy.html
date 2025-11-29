@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact & Support - Chimera</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header Navigation -->
+    <header class="header">
+        <nav class="nav">
+            <div class="nav-container">
+                <div class="logo">
+                    <span>Chimera</span>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="scan.html">URL Scanner</a></li>
+                    <li><a href="email-check.html">Email Checker</a></li>
+                    <li><a href="learn.html">Awareness Hub</a></li>
+                    <li><a href="report.html">Report Suspicious Site</a></li>
+                    <li><a href="contact.html" class="active">Contact</a></li>
+                </ul>
+                <button class="theme-toggle" id="themeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Contact Section -->
+    <main class="contact-main">
+        <div class="container">
+            <div class="contact-header">
+                <h1>Contact & Support</h1>
+                <p>Get help, report issues, or learn more about cybersecurity safety</p>
+            </div>
+
+            <!-- Contact Options Grid -->
+            <section class="contact-options">
+                <div class="options-grid">
+                    <div class="option-card" onclick="showContactForm('support')">
+                        <div class="option-icon">
+                            <i class="fas fa-headset"></i>
+                        </div>
+                        <h3>Technical Support</h3>
+                        <p>Get help with scanner issues, technical problems, or feature requests</p>
+                        <div class="option-features">
+                            <span><i class="fas fa-check"></i> Scanner troubleshooting</span>
+                            <span><i class="fas fa-check"></i> Bug reports</span>
+                            <span><i class="fas fa-check"></i> Feature requests</span>
+                        </div>
+                    </div>
+
+                    <div class="option-card" onclick="showContactForm('security')">
+                        <div class="option-icon">
+                            <i class="fas fa-shield-virus"></i>
+                        </div>
+                        <h3>Security Concerns</h3>
+                        <p>Report security vulnerabilities or urgent security issues</p>
+                        <div class="option-features">
+                            <span><i class="fas fa-check"></i> Vulnerability reports</span>
+                            <span><i class="fas fa-check"></i> Security incidents</span>
+                            <span><i class="fas fa-check"></i> Urgent threats</span>
+                        </div>
+                    </div>
+
+                    <div class="option-card" onclick="showContactForm('partnership')">
+                        <div class="option-icon">
+                            <i class="fas fa-handshake"></i>
+                        </div>
+                        <h3>Partnerships</h3>
+                        <p>Explore collaboration opportunities and partnerships</p>
+                        <div class="option-features">
+                            <span><i class="fas fa-check"></i> Business partnerships</span>
+                            <span><i class="fas fa-check"></i> API integration</span>
+                            <span><i class="fas fa-check"></i> Research collaboration</span>
+                        </div>
+                    </div>
+
+                    <div class="option-card" onclick="showContactForm('feedback')">
+                        <div class="option-icon">
+                            <i class="fas fa-comment-dots"></i>
+                        </div>
+                        <h3>General Feedback</h3>
+                        <p>Share your thoughts, suggestions, or general inquiries</p>
+                        <div class="option-features">
+                            <span><i class="fas fa-check"></i> User experience</span>
+                            <span><i class="fas fa-check"></i> Suggestions</span>
+                            <span><i class="fas fa-check"></i> General questions</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Contact Form Section -->
+            <section id="contactFormSection" class="contact-form-section" style="display: none;">
+                <div class="form-card">
+                    <div class="form-header">
+                        <button class="back-btn" onclick="hideContactForm()">
+                            <i class="fas fa-arrow-left"></i>
+                            Back to Options
+                        </button>
+                        <div class="form-header-text">
+                            <h2 id="formTitle">Contact Us</h2>
+                            <p id="formSubtitle">Please fill out the form below</p>
+                        </div>
+                    </div>
+
+                    <form id="contactForm">
+                        <!-- Contact Type (Hidden) -->
+                        <input type="hidden" id="contactType" name="type">
+
+                        <!-- Name -->
+                        <div class="form-group">
+                            <label for="name">Full Name *</label>
+                            <input type="text" id="name" name="name" required 
+                                   placeholder="John Doe" 
+                                   class="form-input">
+                        </div>
+
+                        <!-- Email -->
+                        <div class="form-group">
+                            <label for="email">Email Address *</label>
+                            <input type="email" id="email" name="email" required 
+                                   placeholder="john.doe@example.com" 
+                                   class="form-input">
+                        </div>
+
+                        <!-- Organization (Optional) -->
+                        <div class="form-group">
+                            <label for="organization">Organization</label>
+                            <input type="text" id="organization" name="organization" 
+                                   placeholder="Company or Institution (Optional)" 
+                                   class="form-input">
+                        </div>
+
+                        <!-- Subject -->
+                        <div class="form-group">
+                            <label for="subject">Subject *</label>
+                            <input type="text" id="subject" name="subject" required 
+                                   placeholder="Brief description of your inquiry" 
+                                   class="form-input">
+                        </div>
+
+                        <!-- Priority -->
+                        <div class="form-group">
+                            <label for="priority">Priority Level</label>
+                            <select id="priority" name="priority" class="form-select">
+                                <option value="low">Low - General inquiry</option>
+                                <option value="medium">Medium - Feature request or feedback</option>
+                                <option value="high">High - Technical issue</option>
+                                <option value="urgent">Urgent - Security concern</option>
+                            </select>
+                        </div>
+
+                        <!-- Message -->
+                        <div class="form-group">
+                            <label for="message">Message *</label>
+                            <textarea id="message" name="message" required 
+                                      placeholder="Please provide detailed information about your inquiry..." 
+                                      class="form-textarea" rows="6"></textarea>
+                        </div>
+
+                        <!-- Attachments -->
+                        <div class="form-group">
+                            <label>Attachments (Optional)</label>
+                            <div class="file-upload-area" id="fileUploadArea">
+                                <div class="upload-content">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <p>Drag and drop files here or click to browse</p>
+                                    <small>Supports: PDF, DOC, DOCX, PNG, JPG (Max 5MB each)</small>
+                                    <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" style="display: none;">
+                                </div>
+                            </div>
+                            <div id="fileList" class="file-list"></div>
+                        </div>
+
+                        <!-- Privacy Consent -->
+                        <div class="form-group">
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="privacyConsent" name="privacyConsent" required>
+                                <label for="privacyConsent" class="checkbox-text">I agree to the <a href="#" onclick="showTermsOfService()">Terms of Service</a> and <a href="#" onclick="showPrivacyPolicy()">Privacy Policy</a></label>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary submit-btn">
+                                <i class="fas fa-paper-plane"></i>
+                                Send Message
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="resetContactForm()">
+                                <i class="fas fa-eraser"></i>
+                                Clear Form
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- FAQ Section -->
+            <section class="faq-section">
+                <div class="section-header">
+                    <h2>Frequently Asked Questions</h2>
+                    <p>Find quick answers to common questions</p>
+                </div>
+
+                <div class="faq-categories">
+                    <div class="category-tabs">
+                        <button class="category-tab active" onclick="showFAQCategory('general')">General</button>
+                        <button class="category-tab" onclick="showFAQCategory('scanner')">Scanner</button>
+                        <button class="category-tab" onclick="showFAQCategory('security')">Security</button>
+                        <button class="category-tab" onclick="showFAQCategory('technical')">Technical</button>
+                    </div>
+
+                    <div class="faq-content">
+                        <!-- General FAQs -->
+                        <div id="generalFAQ" class="faq-category active">
+                            <div class="faq-item">
+                                <div class="faq-question" onclick="toggleFAQ(this)">
+                                    <h4>What is Chimera and how does it work?</h4>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="faq-answer">
+                                    <p>Chimera is an AI-powered phishing detection and prevention tool that analyzes URLs and emails for malicious content. Our system uses machine learning algorithms to identify suspicious patterns, check against threat databases, and provide risk assessments to help you stay safe online.</p>
+                                </div>
+                            </div>
+
+                            <div class="faq-item">
+                                <div class="faq-question" onclick="toggleFAQ(this)">
+                                    <h4>Is Chimera free to use?</h4>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="faq-answer">
+                                    <p>Yes, Chimera offers free basic scanning for URLs and emails. We also provide premium features for organizations and advanced users who need additional capabilities like API access, custom integrations, and detailed analytics.</p>
+                                </div>
+                            </div>
+
+                            <div class="faq-item">
+                                <div class="faq-question" onclick="toggleFAQ(this)">
+                                    <h4>How accurate is the phishing detection?</h4>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="faq-answer">
+                                    <p>Our AI models achieve over 95% accuracy in detecting phishing attempts. However, no system is perfect, and we continuously improve our algorithms based on new threats and user feedback. Always exercise caution when dealing with suspicious content.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Scanner FAQs -->
+                        <div id="scannerFAQ" class="faq-category">
+                            <div class="faq-item">
+                                <div class="faq-question" onclick="toggleFAQ(this)">
+                                    <h4>What types of URLs can I scan?</h4>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="faq-answer">
+                                    <p>You can scan any HTTP or HTTPS URL. Our scanner analyzes domains, checks SSL certificates, evaluates content patterns, and cross-references with known threat databases. We recommend scanning any suspicious links before clicking them.</p>
+                                </div>
+                            </div>
+
+                            <div class="faq-item">
+                                <div class="faq-question" onclick="toggleFAQ(this)">
+                                    <h4>How long does a scan take?</h4>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="faq-answer">
+                                    <p>Most scans complete within 2-5 seconds. The time varies based on the complexity of the URL and the number of security checks needed. We optimize for speed while maintaining thorough analysis.</p>
+                                </div>
+                            </div>
+
+                            <div class="faq-item">
+                                <div class="faq-question" onclick="toggleFAQ(this)">
+                                    <h4>Can I scan multiple URLs at once?</h4>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="faq-answer">
+                                    <p>Currently, our free version supports one URL at a time. Premium users can access batch scanning capabilities through our API or dashboard, allowing multiple simultaneous scans.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Security FAQs -->
+                        <div id="securityFAQ" class="faq-category">
+                            <div class="faq-item">
+                                <div class="faq-question" onclick="toggleFAQ(this)">
+                                    <h4>Is my data safe when using Chimera?</h4>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="faq-answer">
+                                    <p>Absolutely. We prioritize your privacy and security. Scanned URLs and emails are processed securely, and we don't store personal information without consent. Our systems use encryption and follow strict data protection protocols.</p>
+                                </div>
+                            </div>
+
+                            <div class="faq-item">
+                                <div class="faq-question" onclick="toggleFAQ(this)">
+                                    <h4>What happens if I find a false positive?</h4>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="faq-answer">
+                                    <p>We continuously work to minimize false positives. If you encounter one, please report it through our feedback system. Your reports help us improve our algorithms and provide more accurate results for everyone.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Technical FAQs -->
+                        <div id="technicalFAQ" class="faq-category">
+                            <div class="faq-item">
+                                <div class="faq-question" onclick="toggleFAQ(this)">
+                                    <h4>What browsers are supported?</h4>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="faq-answer">
+                                    <p>Chimera works on all modern browsers including Chrome, Firefox, Safari, and Edge. We recommend keeping your browser updated to the latest version for the best experience and security.</p>
+                                </div>
+                            </div>
+
+                            <div class="faq-item">
+                                <div class="faq-question" onclick="toggleFAQ(this)">
+                                    <h4>Do you offer a mobile app?</h4>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="faq-answer">
+                                    <p>Our website is fully mobile-optimized and works great on smartphones and tablets. We're also developing native mobile apps for iOS and Android, which will be available soon.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Quick Help Section -->
+            <section class="quick-help">
+                <div class="help-header">
+                    <h2>Quick Help</h2>
+                    <p>Get immediate assistance for common issues</p>
+                </div>
+
+                <div class="help-grid">
+                    <div class="help-card">
+                        <div class="help-icon">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <h3>User Guide</h3>
+                        <p>Comprehensive documentation for all features</p>
+                        <a href="learn.html" class="help-link">
+                            <i class="fas fa-arrow-right"></i>
+                            View Guide
+                        </a>
+                    </div>
+
+                    <div class="help-card">
+                        <div class="help-icon">
+                            <i class="fas fa-video"></i>
+                        </div>
+                        <h3>Video Tutorials</h3>
+                        <p>Step-by-step video guides for common tasks</p>
+                        <a href="#" class="help-link" onclick="showComingSoon()">
+                            <i class="fas fa-arrow-right"></i>
+                            Watch Videos
+                        </a>
+                    </div>
+
+                    <div class="help-card">
+                        <div class="help-icon">
+                            <i class="fas fa-code"></i>
+                        </div>
+                        <h3>API Documentation</h3>
+                        <p>Developer resources and API reference</p>
+                        <a href="#" class="help-link" onclick="showComingSoon()">
+                            <i class="fas fa-arrow-right"></i>
+                            View Docs
+                        </a>
+                    </div>
+
+                    <div class="help-card">
+                        <div class="help-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h3>Community Forum</h3>
+                        <p>Connect with other users and experts</p>
+                        <a href="#" class="help-link" onclick="showComingSoon()">
+                            <i class="fas fa-arrow-right"></i>
+                            Join Forum
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Emergency Contact -->
+            <section class="emergency-contact">
+                <div class="emergency-card">
+                    <div class="emergency-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="emergency-content">
+                        <h3>Emergency Security Incident?</h3>
+                        <p>If you're experiencing an active security threat or need immediate assistance, contact our emergency response team.</p>
+                        <div class="emergency-actions">
+                            <a href="mailto:emergency@chimera.com" class="btn btn-danger">
+                                <i class="fas fa-envelope"></i>
+                                emergency@chimera.com
+                            </a>
+                            <span class="emergency-time">Response time: Within 1 hour</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="logo">
+                        <span>Chimera</span>
+                    </div>
+                    <p>Smart Phishing Detection & Prevention</p>
+                </div>
+                <div class="footer-links">
+                    <div class="link-group">
+                        <h4>Product</h4>
+                        <ul>
+                            <li><a href="scan.html">URL Scanner</a></li>
+                            <li><a href="email-check.html">Email Checker</a></li>
+                            <li><a href="reports.html">Reports Dashboard</a></li>
+                        </ul>
+                    </div>
+                    <div class="link-group">
+                        <h4>Resources</h4>
+                        <ul>
+                            <li><a href="learn.html">Awareness Hub</a></li>
+                            <li><a href="report.html">Report Suspicious Site</a></li>
+                            <li><a href="contact.html">Contact Support</a></li>
+                        </ul>
+                    </div>
+                    <div class="link-group">
+                        <h4>Connect</h4>
+                        <div class="social-links">
+                            <a href="#"><i class="fab fa-twitter"></i></a>
+                            <a href="#"><i class="fab fa-github"></i></a>
+                            <a href="#"><i class="fab fa-linkedin"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Chimera. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="contact.js"></script>
+</body>
+</html>

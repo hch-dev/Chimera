@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Awareness Hub - Chimera</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header Navigation -->
+    <header class="header">
+        <nav class="nav">
+            <div class="nav-container">
+                <div class="logo">
+                    <span>Chimera</span>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="scan.html">URL Scanner</a></li>
+                    <li><a href="email-check.html">Email Checker</a></li>
+                    <li><a href="learn.html" class="active">Awareness Hub</a></li>
+                    <li><a href="report.html">Report Suspicious Site</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+                <div class="nav-actions">
+                    <button class="theme-toggle" id="themeToggle">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <a href="login.html" class="btn btn-outline btn-sm">Login</a>
+                </div>
+                <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Loading Line -->
+    <div class="loading-line">
+        <div class="loading-progress"></div>
+    </div>
+
+    <!-- Main Learning Section -->
+    <main class="learn-main">
+        <div class="container">
+            <div class="learn-header">
+                <h1>Awareness & Prevention Hub</h1>
+                <p>Learn to identify and protect yourself from phishing attacks with our comprehensive guides</p>
+            </div>
+
+            <!-- Learning Modules Navigation -->
+            <section class="modules-nav">
+                <div class="modules-grid">
+                    <a href="#what-is-phishing" class="module-card">
+                        <div class="module-icon">
+                            <i class="fas fa-question-circle"></i>
+                        </div>
+                        <h3>What is Phishing?</h3>
+                        <p>Understanding the basics of cyber threats</p>
+                        <div class="module-meta">
+                            <span class="duration">5 min read</span>
+                            <span class="difficulty">Beginner</span>
+                        </div>
+                    </a>
+
+                    <a href="#types-of-phishing" class="module-card">
+                        <div class="module-icon">
+                            <i class="fas fa-fish"></i>
+                        </div>
+                        <h3>Types of Phishing</h3>
+                        <p>Spear, Clone, Email, SMS attacks</p>
+                        <div class="module-meta">
+                            <span class="duration">8 min read</span>
+                            <span class="difficulty">Intermediate</span>
+                        </div>
+                    </a>
+
+                    <a href="#identify-fake-websites" class="module-card">
+                        <div class="module-icon">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <h3>Spot Fake Websites</h3>
+                        <p>Visual clues and verification methods</p>
+                        <div class="module-meta">
+                            <span class="duration">6 min read</span>
+                            <span class="difficulty">Beginner</span>
+                        </div>
+                    </a>
+
+                    <a href="#secure-personal-data" class="module-card">
+                        <div class="module-icon">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <h3>Secure Personal Data</h3>
+                        <p>Best practices for data protection</p>
+                        <div class="module-meta">
+                            <span class="duration">7 min read</span>
+                            <span class="difficulty">Intermediate</span>
+                        </div>
+                    </a>
+
+                    <a href="#password-protection" class="module-card">
+                        <div class="module-icon">
+                            <i class="fas fa-key"></i>
+                        </div>
+                        <h3>Password Protection</h3>
+                        <p>Creating and managing strong passwords</p>
+                        <div class="module-meta">
+                            <span class="duration">5 min read</span>
+                            <span class="difficulty">Beginner</span>
+                        </div>
+                    </a>
+
+                    <a href="#safe-browsing-tips" class="module-card">
+                        <div class="module-icon">
+                            <i class="fas fa-globe"></i>
+                        </div>
+                        <h3>Safe Browsing Tips</h3>
+                        <p>Daily habits for online safety</p>
+                        <div class="module-meta">
+                            <span class="duration">4 min read</span>
+                            <span class="difficulty">Beginner</span>
+                        </div>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Learning Content Sections -->
+            <section id="what-is-phishing" class="learning-section">
+                <div class="section-header">
+                    <h2>What is Phishing?</h2>
+                    <div class="section-meta">
+                        <span class="read-time">5 minute read</span>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <div class="content-intro">
+                        <h3>Understanding the Digital Threat</h3>
+                        <p>Phishing is a cybercrime where attackers disguise themselves as trustworthy entities to trick individuals into revealing sensitive information such as passwords, credit card numbers, and personal identification details.</p>
+                    </div>
+
+                    <div class="content-grid">
+                        <div class="content-block">
+                            <h4>How Phishing Works</h4>
+                            <ul>
+                                <li>Attackers create fake emails, websites, or messages</li>
+                                <li>They impersonate legitimate organizations (banks, social media, etc.)</li>
+                                <li>Victims are directed to click malicious links or download attachments</li>
+                                <li>Personal information is stolen and used for fraud</li>
+                            </ul>
+                        </div>
+
+                        <div class="content-block">
+                            <h4>Common Targets</h4>
+                            <ul>
+                                <li>Banking and financial accounts</li>
+                                <li>Email and social media credentials</li>
+                                <li>Corporate login information</li>
+                                <li>Personal identification data</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="visual-example">
+                        <h4>Phishing Attack Flow</h4>
+                        <div class="flow-diagram">
+                            <div class="flow-step">
+                                <i class="fas fa-user-secret"></i>
+                                <span>Attacker creates fake message</span>
+                            </div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-step">
+                                <i class="fas fa-envelope"></i>
+                                <span>Victim receives convincing email</span>
+                            </div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-step">
+                                <i class="fas fa-mouse-pointer"></i>
+                                <span>Victim clicks malicious link</span>
+                            </div>
+                            <div class="flow-arrow">→</div>
+                            <div class="flow-step">
+                                <i class="fas fa-key"></i>
+                                <span>Information is stolen</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="key-takeaways">
+                        <h4>Key Takeaways</h4>
+                        <div class="takeaway-list">
+                            <div class="takeaway-item">
+                                <i class="fas fa-shield-alt"></i>
+                                <span>Always verify sender identity before responding to requests</span>
+                            </div>
+                            <div class="takeaway-item">
+                                <i class="fas fa-search"></i>
+                                <span>Check URLs carefully for misspellings or suspicious domains</span>
+                            </div>
+                            <div class="takeaway-item">
+                                <i class="fas fa-clock"></i>
+                                <span>Legitimate organizations rarely create urgent situations</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="types-of-phishing" class="learning-section">
+                <div class="section-header">
+                    <h2>Types of Phishing Attacks</h2>
+                    <div class="section-meta">
+                        <span class="read-time">8 minute read</span>
+                    </div>
+                </div>
+
+                <div class="types-grid">
+                    <div class="type-card">
+                        <div class="type-icon">
+                            <i class="fas fa-bullseye"></i>
+                        </div>
+                        <h3>Spear Phishing</h3>
+                        <p>Highly targeted attacks against specific individuals or organizations using personalized information.</p>
+                        <div class="type-examples">
+                            <h4>Examples:</h4>
+                            <ul>
+                                <li>Emails referencing recent purchases</li>
+                                <li>Messages using your name and job title</li>
+                                <li>Requests referencing specific company projects</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="type-card">
+                        <div class="type-icon">
+                            <i class="fas fa-copy"></i>
+                        </div>
+                        <h3>Clone Phishing</h3>
+                        <p>Attackers create identical copies of legitimate websites and emails to harvest credentials.</p>
+                        <div class="type-examples">
+                            <h4>Examples:</h4>
+                            <ul>
+                                <li>Fake banking login pages</li>
+                                <li>Duplicated social media sites</li>
+                                <li>Counterfeit email login portals</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="type-card">
+                        <div class="type-icon">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <h3>SMishing (SMS Phishing)</h3>
+                        <p>Phishing attacks conducted through text messages, often containing malicious links.</p>
+                        <div class="type-examples">
+                            <h4>Examples:</h4>
+                            <ul>
+                                <li>Package delivery scams</li>
+                                <li>Bank account alerts</li>
+                                <li>Prize winning notifications</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="type-card">
+                        <div class="type-icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <h3>Vishing (Voice Phishing)</h3>
+                        <p>Phone-based phishing attacks where attackers impersonate legitimate organizations.</p>
+                        <div class="type-examples">
+                            <h4>Examples:</h4>
+                            <ul>
+                                <li>Fake tech support calls</li>
+                                <li>Bank fraud department impersonation</li>
+                                <li>Government agency scams</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="identify-fake-websites" class="learning-section">
+                <div class="section-header">
+                    <h2>How to Identify Fake Websites</h2>
+                    <div class="section-meta">
+                        <span class="read-time">6 minute read</span>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <div class="detection-methods">
+                        <div class="method-card">
+                            <div class="method-icon">
+                                <i class="fas fa-link"></i>
+                            </div>
+                            <h3>URL Inspection</h3>
+                            <div class="method-content">
+                                <h4>What to Check:</h4>
+                                <ul>
+                                    <li><strong>Domain spelling:</strong> Look for subtle misspellings (gogle.com vs google.com)</li>
+                                    <li><strong>HTTPS:</strong> Ensure the site uses secure encryption</li>
+                                    <li><strong>Subdomains:</strong> Be wary of unusual subdomain structures</li>
+                                    <li><strong>URL shorteners:</strong> Avoid clicking shortened links from unknown sources</li>
+                                </ul>
+                                <div class="example-box">
+                                    <h5>Real vs Fake Examples:</h5>
+                                    <div class="url-comparison">
+                                        <div class="url-item safe">
+                                            <span class="url-label">✓ Legitimate:</span>
+                                            <span class="url-text">https://www.chase.com</span>
+                                        </div>
+                                        <div class="url-item dangerous">
+                                            <span class="url-label">✗ Fake:</span>
+                                            <span class="url-text">https://www.chase-login.com</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="method-card">
+                            <div class="method-icon">
+                                <i class="fas fa-certificate"></i>
+                            </div>
+                            <h3>SSL Certificate Check</h3>
+                            <div class="method-content">
+                                <h4>How to Verify:</h4>
+                                <ul>
+                                    <li>Look for the padlock icon in the address bar</li>
+                                    <li>Click the padlock to view certificate details</li>
+                                    <li>Verify if the certificate matches the domain</li>
+                                    <li>Check for certificate validity and issuer</li>
+                                </ul>
+                                <div class="warning-box">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <span>Even sites with valid SSL certificates can be malicious - always verify the domain!</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="method-card">
+                            <div class="method-icon">
+                                <i class="fas fa-palette"></i>
+                            </div>
+                            <h3>Visual Inspection</h3>
+                            <div class="method-content">
+                                <h4>Red Flags:</h4>
+                                <ul>
+                                    <li><strong>Poor design quality:</strong> Low-resolution images, broken layouts</li>
+                                    <li><strong>Grammar errors:</strong> Typos and poor language quality</li>
+                                    <li><strong>Missing elements:</strong> Incomplete navigation, broken links</li>
+                                    <li><strong>Outdated content:</strong> Old dates, expired promotions</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="secure-personal-data" class="learning-section">
+                <div class="section-header">
+                    <h2>How to Secure Personal Data</h2>
+                    <div class="section-meta">
+                        <span class="read-time">7 minute read</span>
+                    </div>
+                </div>
+
+                <div class="security-practices">
+                    <div class="practice-category">
+                        <h3>Online Behavior</h3>
+                        <div class="practice-grid">
+                            <div class="practice-item">
+                                <div class="practice-icon">
+                                    <i class="fas fa-share-alt"></i>
+                                </div>
+                                <h4>Limit Information Sharing</h4>
+                                <p>Only provide necessary information on websites and social media. Avoid oversharing personal details that could be used for social engineering.</p>
+                            </div>
+                            <div class="practice-item">
+                                <div class="practice-icon">
+                                    <i class="fas fa-user-shield"></i>
+                                </div>
+                                <h4>Use Privacy Settings</h4>
+                                <p>Regularly review and update privacy settings on social media and online accounts to control who can see your information.</p>
+                            </div>
+                            <div class="practice-item">
+                                <div class="practice-icon">
+                                    <i class="fas fa-wifi"></i>
+                                </div>
+                                <h4>Avoid Public WiFi</h4>
+                                <p>Refrain from accessing sensitive accounts on public WiFi networks. Use VPN services when connecting to unfamiliar networks.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="practice-category">
+                        <h3>Technical Protection</h3>
+                        <div class="practice-grid">
+                            <div class="practice-item">
+                                <div class="practice-icon">
+                                    <i class="fas fa-shield-virus"></i>
+                                </div>
+                                <h4>Install Security Software</h4>
+                                <p>Use reputable antivirus and anti-malware software. Keep all security software updated with the latest definitions.</p>
+                            </div>
+                            <div class="practice-item">
+                                <div class="practice-icon">
+                                    <i class="fas fa-sync"></i>
+                                </div>
+                                <h4>Regular Updates</h4>
+                                <p>Keep your operating system, browsers, and applications updated to protect against known vulnerabilities.</p>
+                            </div>
+                            <div class="practice-item">
+                                <div class="practice-icon">
+                                    <i class="fas fa-cloud"></i>
+                                </div>
+                                <h4>Data Backup</h4>
+                                <p>Regularly backup important data to secure locations. Use cloud storage with encryption for sensitive files.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="password-protection" class="learning-section">
+                <div class="section-header">
+                    <h2>Password Protection Best Practices</h2>
+                    <div class="section-meta">
+                        <span class="read-time">5 minute read</span>
+                    </div>
+                </div>
+
+                <div class="password-guide">
+                    <div class="guide-section">
+                        <h3>Creating Strong Passwords</h3>
+                        <div class="password-criteria">
+                            <div class="criteria-item">
+                                <i class="fas fa-check-circle text-success"></i>
+                                <div>
+                                    <strong>Length:</strong> At least 12-16 characters
+                                </div>
+                            </div>
+                            <div class="criteria-item">
+                                <i class="fas fa-check-circle text-success"></i>
+                                <div>
+                                    <strong>Complexity:</strong> Mix of uppercase, lowercase, numbers, and symbols
+                                </div>
+                            </div>
+                            <div class="criteria-item">
+                                <i class="fas fa-check-circle text-success"></i>
+                                <div>
+                                    <strong>Uniqueness:</strong> Different passwords for each account
+                                </div>
+                            </div>
+                            <div class="criteria-item">
+                                <i class="fas fa-times-circle text-danger"></i>
+                                <div>
+                                    <strong>Avoid:</strong> Personal information, common words, keyboard patterns
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="guide-section">
+                        <h3>Password Management Tools</h3>
+                        <div class="tools-grid">
+                            <div class="tool-card">
+                                <h4>Password Managers</h4>
+                                <p>Applications that securely store and generate strong passwords. Examples include LastPass, 1Password, and Bitwarden.</p>
+                            </div>
+                            <div class="tool-card">
+                                <h4>Two-Factor Authentication</h4>
+                                <p>Add an extra layer of security with codes from apps like Google Authenticator or Authy.</p>
+                            </div>
+                            <div class="tool-card">
+                                <h4>Biometric Options</h4>
+                                <p>Use fingerprint or facial recognition when available for convenient and secure access.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="password-examples">
+                        <h3>Password Strength Examples</h3>
+                        <div class="example-grid">
+                            <div class="example-item weak">
+                                <div class="example-password">password123</div>
+                                <div class="example-strength">Very Weak</div>
+                                <div class="example-reason">Common word + simple numbers</div>
+                            </div>
+                            <div class="example-item medium">
+                                <div class="example-password">Tr@vel2025!</div>
+                                <div class="example-strength">Medium</div>
+                                <div class="example-reason">Good complexity but predictable</div>
+                            </div>
+                            <div class="example-item strong">
+                                <div class="example-password">bLue#ocean@Sunset99</div>
+                                <div class="example-strength">Strong</div>
+                                <div class="example-reason">Long, complex, and memorable</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="safe-browsing-tips" class="learning-section">
+                <div class="section-header">
+                    <h2>Safe Browsing Tips</h2>
+                    <div class="section-meta">
+                        <span class="read-time">4 minute read</span>
+                    </div>
+                </div>
+
+                <div class="tips-container">
+                    <div class="tips-grid">
+                        <div class="tip-card">
+                            <div class="tip-number">1</div>
+                            <h3>Verify Before You Click</h3>
+                            <p>Hover over links to preview the actual URL before clicking. Be skeptical of unsolicited emails and messages.</p>
+                        </div>
+                        <div class="tip-card">
+                            <div class="tip-number">2</div>
+                            <h3>Use Bookmarks</h3>
+                            <p>Bookmark frequently visited legitimate sites instead of searching for them each time to avoid landing on fake versions.</p>
+                        </div>
+                        <div class="tip-card">
+                            <div class="tip-number">3</div>
+                            <h3>Enable Browser Security</h3>
+                            <p>Activate built-in browser security features like phishing protection and malicious site warnings.</p>
+                        </div>
+                        <div class="tip-card">
+                            <div class="tip-number">4</div>
+                            <h3>Regular Security Checkups</h3>
+                            <p>Periodically review your account activity and security settings. Look for suspicious login attempts.</p>
+                        </div>
+                        <div class="tip-card">
+                            <div class="tip-number">5</div>
+                            <h3>Educate Yourself Continuously</h3>
+                            <p>Stay informed about new phishing tactics and security threats. Share knowledge with family and friends.</p>
+                        </div>
+                        <div class="tip-card">
+                            <div class="tip-number">6</div>
+                            <h3>Trust Your Instincts</h3>
+                            <p>If something seems suspicious or too good to be true, it probably is. Take time to verify before acting.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Interactive Quiz Section -->
+            <section class="quiz-section">
+                <div class="section-header">
+                    <h2>Test Your Knowledge</h2>
+                    <p>Take our quick quiz to see how well you can spot phishing attempts</p>
+                </div>
+                <div class="quiz-card">
+                    <div class="quiz-question">
+                        <h3>You receive an email from your bank asking you to verify your account by clicking a link. What should you do?</h3>
+                        <div class="quiz-options">
+                            <button class="quiz-option" onclick="checkAnswer(this, false)">
+                                Click the link immediately to verify
+                            </button>
+                            <button class="quiz-option" onclick="checkAnswer(this, true)">
+                                Contact your bank directly through their official website or phone number
+                            </button>
+                            <button class="quiz-option" onclick="checkAnswer(this, false)">
+                                Reply to the email with your account information
+                            </button>
+                            <button class="quiz-option" onclick="checkAnswer(this, false)">
+                                Forward the email to friends for their opinion
+                            </button>
+                        </div>
+                        <div id="quizFeedback" class="quiz-feedback" style="display: none;"></div>
+                    </div>
+                    <div class="quiz-actions">
+                        <button onclick="loadNextQuestion()" class="btn btn-secondary">Next Question</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="logo">
+                        <span>Chimera</span>
+                    </div>
+                    <p>Smart Phishing Detection & Prevention</p>
+                </div>
+                <div class="footer-links">
+                    <div class="link-group">
+                        <h4>Product</h4>
+                        <ul>
+                            <li><a href="scan.html">URL Scanner</a></li>
+                            <li><a href="email-check.html">Email Checker</a></li>
+                            <li><a href="reports.html">Reports Dashboard</a></li>
+                        </ul>
+                    </div>
+                    <div class="link-group">
+                        <h4>Resources</h4>
+                        <ul>
+                            <li><a href="learn.html">Awareness Hub</a></li>
+                            <li><a href="report.html">Report Suspicious Site</a></li>
+                            <li><a href="contact.html">Contact Support</a></li>
+                        </ul>
+                    </div>
+                    <div class="link-group">
+                        <h4>Connect</h4>
+                        <div class="social-links">
+                            <a href="#"><i class="fab fa-github"></i></a>
+                            <a href="#"><i class="fab fa-linkedin"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Chimera. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="learn.js"></script>
+</body>
+</html>

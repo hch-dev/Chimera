@@ -1,0 +1,1027 @@
+// Learning Page Specific JavaScript
+
+// Quiz functionality
+let currentQuestionIndex = 0;
+const quizQuestions = [
+    {
+        question: "You receive an email from your bank asking you to verify your account by clicking a link. What should you do?",
+        options: [
+            "Click the link immediately to verify",
+            "Contact your bank directly through their official website or phone number",
+            "Reply to the email with your account information",
+            "Forward the email to friends for their opinion"
+        ],
+        correct: 1
+    },
+    {
+        question: "Which of these is a sign that a website might be fake?",
+        options: [
+            "The website has HTTPS encryption",
+            "The URL has a slight misspelling of a well-known brand",
+            "The website loads quickly",
+            "The website has customer reviews"
+        ],
+        correct: 1
+    },
+    {
+        question: "What is the best practice for creating strong passwords?",
+        options: [
+            "Use the same password for all accounts",
+            "Use your birthday and pet's name",
+            "Create long, complex passwords with a mix of characters",
+            "Use common dictionary words with numbers"
+        ],
+        correct: 2
+    },
+    {
+        question: "You receive a text message saying you've won a prize and need to click a link to claim it. What should you do?",
+        options: [
+            "Click the link immediately to claim your prize",
+            "Delete the message without clicking the link",
+            "Forward the message to your contacts",
+            "Reply asking for more details"
+        ],
+        correct: 1
+    },
+    {
+        question: "Which of these is NOT a reliable way to verify if an email is legitimate?",
+        options: [
+            "Checking the sender's email address carefully",
+            "Hovering over links to see the actual URL",
+            "Looking for grammar and spelling errors",
+            "Trusting emails that address you by name"
+        ],
+        correct: 3
+    }
+];
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', () => {
+    // Smooth scroll for anchor links
+    setupSmoothScroll();
+    
+    // Progress tracking - removed
+    // setupProgressTracking();
+    
+    // Setup scroll-based loading line
+    setupScrollLoading();
+    
+    // Initialize quiz
+    loadQuizQuestion();
+});
+
+// Setup smooth scrolling
+function setupSmoothScroll() {
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+}
+
+// Setup progress tracking - removed
+
+// Setup scroll-based loading line
+function setupScrollLoading() {
+    const loadingProgress = document.querySelector('.loading-progress');
+    if (!loadingProgress) return;
+    
+    // Track scroll progress
+    window.addEventListener('scroll', () => {
+        const windowHeight = window.innerHeight;
+        const documentHeight = document.documentElement.scrollHeight - windowHeight;
+        const scrolled = window.scrollY;
+        const progress = Math.min((scrolled / documentHeight) * 100, 100);
+        
+        loadingProgress.style.width = progress + '%';
+    });
+}
+
+// Load quiz question
+function loadQuizQuestion() {
+    const question = quizQuestions[currentQuestionIndex];
+    const questionElement = document.querySelector('.quiz-question h3');
+    const optionsContainer = document.querySelector('.quiz-options');
+    const feedbackElement = document.getElementById('quizFeedback');
+    
+    questionElement.textContent = question.question;
+    
+    optionsContainer.innerHTML = question.options.map((option, index) => `
+        <button class="quiz-option" onclick="checkAnswer(this, ${index === question.correct})">
+            ${option}
+        </button>
+    `).join('');
+    
+    feedbackElement.style.display = 'none';
+    feedbackElement.className = 'quiz-feedback';
+}
+
+// Check quiz answer
+function checkAnswer(button, isCorrect) {
+    const options = document.querySelectorAll('.quiz-option');
+    const feedback = document.getElementById('quizFeedback');
+    
+    // Disable all options
+    options.forEach(option => option.disabled = true);
+    
+    // Mark correct/incorrect
+    if (isCorrect) {
+        button.classList.add('correct');
+        feedback.innerHTML = `
+            <i class="fas fa-check-circle"></i>
+            <span>Correct! That's the right approach to stay safe online.</span>
+        `;
+        feedback.classList.add('success');
+    } else {
+        button.classList.add('incorrect');
+        // Show correct answer
+        const correctIndex = quizQuestions[currentQuestionIndex].correct;
+        options[correctIndex].classList.add('correct');
+        
+        feedback.innerHTML = `
+            <i class="fas fa-times-circle"></i>
+            <span>Not quite right. The best practice is to ${quizQuestions[currentQuestionIndex].options[correctIndex].toLowerCase()}</span>
+        `;
+        feedback.classList.add('error');
+    }
+    
+    feedback.style.display = 'block';
+}
+
+// Load next question
+function loadNextQuestion() {
+    currentQuestionIndex = (currentQuestionIndex + 1) % quizQuestions.length;
+    loadQuizQuestion();
+}
+
+// Interactive elements
+function setupInteractiveElements() {
+    // Add hover effects to module cards
+    const moduleCards = document.querySelectorAll('.module-card');
+    moduleCards.forEach(card => {
+        card.addEventListener('mouseenter', () => {
+            card.style.transform = 'translateY(-5px)';
+        });
+        
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = 'translateY(0)';
+        });
+    });
+    
+    // Add click tracking for learning sections
+    const learningSections = document.querySelectorAll('.learning-section');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                // Track that user has viewed this section
+                const sectionId = entry.target.id;
+                localStorage.setItem(`viewed_${sectionId}`, 'true');
+            }
+        });
+    });
+    
+    learningSections.forEach(section => {
+        observer.observe(section);
+    });
+}
+
+// Add learning page specific CSS
+const learnCSS = `
+.learn-main {
+    padding: 2rem 0 4rem;
+    min-height: calc(100vh - 200px);
+}
+
+.learn-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.learn-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.learn-header p {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+
+.modules-nav {
+    margin-bottom: 4rem;
+}
+
+.modules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.module-card {
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    text-decoration: none;
+    color: inherit;
+    transition: var(--transition);
+    border: 1px solid var(--border-color);
+    display: block;
+}
+
+.module-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-color);
+}
+
+.module-icon {
+    width: 60px;
+    height: 60px;
+    background: var(--gradient-primary);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    color: white;
+    font-size: 1.5rem;
+}
+
+.module-card h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+    color: var(--text-primary);
+}
+
+.module-card p {
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+
+.module-meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.85rem;
+}
+
+.duration {
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.difficulty {
+    color: var(--text-muted);
+    background: var(--bg-tertiary);
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+}
+
+.learning-section {
+    margin-bottom: 4rem;
+    scroll-margin-top: 100px;
+}
+
+.section-header {
+    margin-bottom: 2rem;
+}
+
+.section-header h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.section-meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.content-card {
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius);
+    padding: 2.5rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
+}
+
+.content-intro {
+    margin-bottom: 2rem;
+}
+
+.content-intro h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.content-block h4 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.content-block ul {
+    list-style: none;
+    padding: 0;
+}
+
+.content-block li {
+    padding: 0.5rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+    color: var(--text-secondary);
+}
+
+.content-block li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+.visual-example {
+    background: var(--bg-tertiary);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    margin: 2rem 0;
+}
+
+.visual-example h4 {
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+}
+
+.flow-diagram {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.flow-step {
+    flex: 1;
+    min-width: 120px;
+    text-align: center;
+    padding: 1rem;
+    background: white;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .flow-step {
+    background: #1a3a52;
+}
+
+.flow-step i {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+[data-theme="dark"] .flow-step i {
+    color: white;
+}
+
+.flow-step span {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .flow-step span {
+    color: white;
+}
+
+.flow-arrow {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+.key-takeaways {
+    background: rgba(0, 102, 204, 0.05);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    border: 1px solid rgba(0, 102, 204, 0.2);
+}
+
+.key-takeaways h4 {
+    margin-bottom: 1.5rem;
+    color: var(--primary-color);
+}
+
+.takeaway-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.takeaway-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: white;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .takeaway-item {
+    background: #1a3a52;
+}
+
+.takeaway-item i {
+    color: var(--primary-color);
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+[data-theme="dark"] .takeaway-item i {
+    color: white;
+}
+
+.types-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+}
+
+.type-card {
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    border: 1px solid var(--border-color);
+}
+
+.type-icon {
+    width: 60px;
+    height: 60px;
+    background: var(--gradient-secondary);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    color: white;
+    font-size: 1.5rem;
+}
+
+.type-card h3 {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.type-card p {
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+}
+
+.type-examples h4 {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+    color: var(--text-primary);
+}
+
+.type-examples ul {
+    list-style: none;
+    padding: 0;
+}
+
+.type-examples li {
+    padding: 0.25rem 0;
+    padding-left: 1rem;
+    position: relative;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.type-examples li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--secondary-color);
+}
+
+.detection-methods {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.method-card {
+    background: var(--bg-tertiary);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .method-card {
+    background: #1a3a52;
+}
+
+.method-icon {
+    width: 50px;
+    height: 50px;
+    background: var(--gradient-primary);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    color: white;
+    font-size: 1.25rem;
+}
+
+.method-card h3 {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .method-card h3 {
+    color: white;
+}
+
+.method-content h4 {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.method-content ul {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 1.5rem;
+}
+
+.method-content li {
+    padding: 0.5rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+    color: var(--text-secondary);
+}
+
+.method-content li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--primary-color);
+}
+
+.example-box {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .example-box {
+    background: #1a3a52;
+}
+
+.example-box h5 {
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .example-box h5 {
+    color: white;
+}
+
+.url-comparison {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.url-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    border-radius: 6px;
+    font-family: monospace;
+}
+
+.url-item.safe {
+    background: rgba(40, 167, 69, 0.1);
+    border: 1px solid var(--success-color);
+}
+
+[data-theme="dark"] .url-item.safe {
+    background: rgba(40, 167, 69, 0.2);
+    color: white;
+}
+
+.url-item.dangerous {
+    background: rgba(220, 53, 69, 0.1);
+    border: 1px solid var(--danger-color);
+}
+
+[data-theme="dark"] .url-item.dangerous {
+    background: rgba(220, 53, 69, 0.2);
+    color: white;
+}
+
+.url-label {
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.url-text {
+    font-family: monospace;
+    font-size: 0.9rem;
+}
+
+.warning-box {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(255, 193, 7, 0.1);
+    border: 1px solid var(--warning-color);
+    border-radius: var(--border-radius);
+    color: var(--warning-color);
+}
+
+.security-practices {
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+}
+
+.practice-category h3 {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    color: var(--text-primary);
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 0.5rem;
+}
+
+.practice-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.practice-item {
+    background: var(--bg-tertiary);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    border: 1px solid var(--border-color);
+}
+
+.practice-icon {
+    width: 50px;
+    height: 50px;
+    background: var(--gradient-primary);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    color: white;
+    font-size: 1.25rem;
+}
+
+.practice-item h4 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.practice-item p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.password-guide {
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+}
+
+.guide-section h3 {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    color: var(--text-primary);
+}
+
+.password-criteria {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.criteria-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--bg-tertiary);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+}
+
+.criteria-item i {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.tool-card {
+    background: var(--bg-tertiary);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
+}
+
+.tool-card h4 {
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.password-examples h3 {
+    margin-bottom: 2rem;
+    color: var(--text-primary);
+}
+
+.example-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.example-item {
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    text-align: center;
+    border: 2px solid;
+}
+
+.example-item.weak {
+    background: rgba(220, 53, 69, 0.1);
+    border-color: var(--danger-color);
+}
+
+.example-item.medium {
+    background: rgba(255, 193, 7, 0.1);
+    border-color: var(--warning-color);
+}
+
+.example-item.strong {
+    background: rgba(40, 167, 69, 0.1);
+    border-color: var(--success-color);
+}
+
+.example-password {
+    font-family: monospace;
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    word-break: break-all;
+}
+
+.example-strength {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.example-reason {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.tips-container {
+    margin-top: 2rem;
+}
+
+.tips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.tip-card {
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    border: 1px solid var(--border-color);
+    position: relative;
+}
+
+.tip-number {
+    position: absolute;
+    top: -15px;
+    left: -15px;
+    width: 40px;
+    height: 40px;
+    background: var(--gradient-primary);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-weight: bold;
+    font-size: 1.25rem;
+}
+
+.tip-card h3 {
+    font-size: 1.1rem;
+    margin: 1rem 0 1rem;
+    color: var(--text-primary);
+}
+
+.tip-card p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.quiz-section {
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius);
+    padding: 3rem;
+    margin-top: 4rem;
+    border: 1px solid var(--border-color);
+}
+
+.quiz-section .section-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.quiz-card {
+    background: var(--bg-primary);
+    border-radius: var(--border-radius);
+    padding: 2.5rem;
+    border: 1px solid var(--border-color);
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.quiz-question h3 {
+    font-size: 1.25rem;
+    margin-bottom: 2rem;
+    color: var(--text-primary);
+}
+
+.quiz-options {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.quiz-option {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    text-align: left;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.quiz-option:hover:not(:disabled) {
+    border-color: var(--primary-color);
+    background: rgba(0, 102, 204, 0.05);
+}
+
+.quiz-option:disabled {
+    cursor: not-allowed;
+}
+
+.quiz-option.correct {
+    background: rgba(40, 167, 69, 0.1);
+    border-color: var(--success-color);
+    color: var(--success-color);
+}
+
+.quiz-option.incorrect {
+    background: rgba(220, 53, 69, 0.1);
+    border-color: var(--danger-color);
+    color: var(--danger-color);
+}
+
+.quiz-feedback {
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.quiz-feedback.success {
+    background: rgba(40, 167, 69, 0.1);
+    border: 1px solid var(--success-color);
+    color: var(--success-color);
+}
+
+.quiz-feedback.error {
+    background: rgba(220, 53, 69, 0.1);
+    border: 1px solid var(--danger-color);
+    color: var(--danger-color);
+}
+
+.quiz-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.text-success {
+    color: var(--success-color);
+}
+
+.text-danger {
+    color: var(--danger-color);
+}
+
+@media (max-width: 768px) {
+    .learn-header h1 {
+        font-size: 2rem;
+    }
+    
+    .modules-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .types-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .practice-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .tools-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .tips-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .flow-diagram {
+        flex-direction: column;
+    }
+    
+    .flow-arrow {
+        transform: rotate(90deg);
+    }
+    
+    .quiz-actions {
+        flex-direction: column;
+    }
+    
+    .quiz-actions .btn {
+        width: 100%;
+    }
+}
+`;
+
+// Inject learning page CSS
+const learnStyleSheet = document.createElement('style');
+learnStyleSheet.textContent = learnCSS;
+document.head.appendChild(learnStyleSheet);
+
+// Initialize interactive elements
+setupInteractiveElements();

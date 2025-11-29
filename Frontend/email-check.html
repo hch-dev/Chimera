@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Phishing Checker - Chimera</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header Navigation -->
+    <header class="header">
+        <nav class="nav">
+            <div class="nav-container">
+                <div class="logo">
+                    <span>Chimera</span>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="scan.html">URL Scanner</a></li>
+                    <li><a href="email-check.html" class="active">Email Checker</a></li>
+                    <li><a href="learn.html">Awareness Hub</a></li>
+                    <li><a href="report.html">Report Suspicious Site</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+                <div class="nav-actions">
+                    <button class="theme-toggle" id="themeToggle">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <a href="login.html" class="btn btn-outline btn-sm">Login</a>
+                </div>
+                <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Email Checker Section -->
+    <main class="email-checker-main">
+        <div class="container">
+            <div class="checker-header">
+                <h1>Email Phishing Checker</h1>
+                <p>Analyze email content for phishing attempts, spoofed headers, and malicious attachments</p>
+            </div>
+
+            <!-- Email Input Section -->
+            <section class="email-input-section">
+                <div class="checker-card">
+                    <div class="input-methods">
+                        <div class="method-tabs">
+                            <button class="tab-btn active" data-tab="paste">Paste Email</button>
+                            <button class="tab-btn" data-tab="upload">Upload File</button>
+                        </div>
+                        
+                        <!-- Paste Email Tab -->
+                        <div id="pasteTab" class="tab-content active">
+                            <div class="input-group">
+                                <label for="emailSubject">Email Subject</label>
+                                <input type="text" id="emailSubject" placeholder="Enter email subject..." class="email-input">
+                            </div>
+                            
+                            <div class="input-group">
+                                <label for="emailFrom">From Address</label>
+                                <input type="email" id="emailFrom" placeholder="sender@example.com" class="email-input">
+                            </div>
+                            
+                            <div class="input-group">
+                                <label for="emailContent">Email Content</label>
+                                <textarea id="emailContent" placeholder="Paste the full email content here..." class="email-textarea" rows="10"></textarea>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label for="emailHeaders">Email Headers (Optional)</label>
+                                <textarea id="emailHeaders" placeholder="Paste email headers if available..." class="email-textarea" rows="4"></textarea>
+                                <small class="input-help">You can find headers in your email client's "Show Original" or "View Source" option</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Upload File Tab -->
+                        <div id="uploadTab" class="tab-content">
+                            <div class="upload-area" id="uploadArea">
+                                <div class="upload-icon">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                </div>
+                                <h3>Drop email file here or click to browse</h3>
+                                <p>Supports .eml, .msg, .txt files (Max 10MB)</p>
+                                <input type="file" id="fileInput" accept=".eml,.msg,.txt" style="display: none;">
+                                <button class="btn btn-outline" onclick="document.getElementById('fileInput').click()">
+                                    <i class="fas fa-folder-open"></i>
+                                    Choose File
+                                </button>
+                            </div>
+                            <div id="fileInfo" class="file-info" style="display: none;">
+                                <div class="file-details">
+                                    <i class="fas fa-file"></i>
+                                    <span id="fileName"></span>
+                                    <button class="remove-file" onclick="removeFile()">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="check-actions">
+                        <button id="checkBtn" class="btn btn-primary check-button">
+                            <i class="fas fa-search"></i>
+                            Check for Phishing
+                        </button>
+                        <button class="btn btn-secondary" onclick="clearForm()">
+                            <i class="fas fa-eraser"></i>
+                            Clear
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Loading State -->
+            <section id="loadingSection" class="loading-section" style="display: none;">
+                <div class="loading-card">
+                    <div class="email-scanner-animation">
+                        <div class="envelope-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="scan-waves">
+                            <div class="wave"></div>
+                            <div class="wave"></div>
+                            <div class="wave"></div>
+                        </div>
+                    </div>
+                    <h3>Analyzing Email...</h3>
+                    <p>Checking for phishing patterns, malicious links, and suspicious content</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section id="resultsSection" class="results-section" style="display: none;">
+                <!-- Phishing Risk Score -->
+                <div class="phishing-risk-card">
+                    <div class="risk-header">
+                        <h2>Phishing Risk Assessment</h2>
+                        <div id="phishingBadge" class="phishing-badge">
+                            <i class="fas fa-shield-check"></i>
+                            <span id="phishingLevel">Low Risk</span>
+                        </div>
+                    </div>
+                    <div class="risk-metrics">
+                        <div class="metric-card">
+                            <div class="metric-value" id="phishingScore">15</div>
+                            <div class="metric-label">Phishing Score</div>
+                            <div class="metric-desc">Lower is safer</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value" id="confidenceScore">92%</div>
+                            <div class="metric-label">Confidence</div>
+                            <div class="metric-desc">Analysis accuracy</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value" id="threatLevel">Low</div>
+                            <div class="metric-label">Threat Level</div>
+                            <div class="metric-desc">Overall danger</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analysis Breakdown -->
+                <div class="analysis-breakdown">
+                    <h3>Detailed Analysis</h3>
+                    <div class="analysis-categories">
+                        <!-- Spam Keywords -->
+                        <div class="category-card">
+                            <div class="category-header">
+                                <div class="category-icon">
+                                    <i class="fas fa-tags"></i>
+                                </div>
+                                <h4>Spam Keywords</h4>
+                                <div id="spamStatus" class="status-badge safe">Clean</div>
+                            </div>
+                            <div id="spamKeywords" class="category-content">
+                                <p>No suspicious keywords detected</p>
+                            </div>
+                        </div>
+
+                        <!-- Email Headers -->
+                        <div class="category-card">
+                            <div class="category-header">
+                                <div class="category-icon">
+                                    <i class="fas fa-code"></i>
+                                </div>
+                                <h4>Email Headers</h4>
+                                <div id="headerStatus" class="status-badge safe">Valid</div>
+                            </div>
+                            <div id="headerAnalysis" class="category-content">
+                                <p>Email headers appear legitimate</p>
+                            </div>
+                        </div>
+
+                        <!-- Urgency Language -->
+                        <div class="category-card">
+                            <div class="category-header">
+                                <div class="category-icon">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <h4>Urgency Language</h4>
+                                <div id="urgencyStatus" class="status-badge safe">Normal</div>
+                            </div>
+                            <div id="urgencyAnalysis" class="category-content">
+                                <p>No excessive urgency detected</p>
+                            </div>
+                        </div>
+
+                        <!-- Attachments -->
+                        <div class="category-card">
+                            <div class="category-header">
+                                <div class="category-icon">
+                                    <i class="fas fa-paperclip"></i>
+                                </div>
+                                <h4>Attachments</h4>
+                                <div id="attachmentStatus" class="status-badge safe">Safe</div>
+                            </div>
+                            <div id="attachmentAnalysis" class="category-content">
+                                <p>No dangerous attachments detected</p>
+                            </div>
+                        </div>
+
+                        <!-- Links Analysis -->
+                        <div class="category-card">
+                            <div class="category-header">
+                                <div class="category-icon">
+                                    <i class="fas fa-link"></i>
+                                </div>
+                                <h4>Suspicious Links</h4>
+                                <div id="linkStatus" class="status-badge safe">Clean</div>
+                            </div>
+                            <div id="linkAnalysis" class="category-content">
+                                <p>No malicious links found</p>
+                            </div>
+                        </div>
+
+                        <!-- Sender Analysis -->
+                        <div class="category-card">
+                            <div class="category-header">
+                                <div class="category-icon">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <h4>Sender Verification</h4>
+                                <div id="senderStatus" class="status-badge safe">Verified</div>
+                            </div>
+                            <div id="senderAnalysis" class="category-content">
+                                <p>Sender identity appears legitimate</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Highlighted Risks -->
+                <div id="highlightedRisks" class="highlighted-risks" style="display: none;">
+                    <h3>Risky Content Detected</h3>
+                    <div id="riskHighlights" class="risk-highlights">
+                        <!-- Risk highlights will be inserted here -->
+                    </div>
+                </div>
+
+                <!-- Recommendations -->
+                <div class="recommendations-card">
+                    <h3>Safety Recommendations</h3>
+                    <div id="emailRecommendations" class="recommendations-list">
+                        <!-- Recommendations will be inserted here -->
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button onclick="checkAnotherEmail()" class="btn btn-secondary">
+                        <i class="fas fa-redo"></i>
+                        Check Another Email
+                    </button>
+                    <button onclick="reportPhishingEmail()" class="btn btn-outline">
+                        <i class="fas fa-flag"></i>
+                        Report Phishing
+                    </button>
+                    <button onclick="exportEmailReport()" class="btn btn-outline">
+                        <i class="fas fa-download"></i>
+                        Export Report
+                    </button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="logo">
+                        <span>Chimera</span>
+                    </div>
+                    <p>Smart Phishing Detection & Prevention</p>
+                </div>
+                <div class="footer-links">
+                    <div class="link-group">
+                        <h4>Product</h4>
+                        <ul>
+                            <li><a href="scan.html">URL Scanner</a></li>
+                            <li><a href="email-check.html">Email Checker</a></li>
+                            <li><a href="reports.html">Reports Dashboard</a></li>
+                        </ul>
+                    </div>
+                    <div class="link-group">
+                        <h4>Resources</h4>
+                        <ul>
+                            <li><a href="learn.html">Awareness Hub</a></li>
+                            <li><a href="report.html">Report Suspicious Site</a></li>
+                            <li><a href="contact.html">Contact Support</a></li>
+                        </ul>
+                    </div>
+                    <div class="link-group">
+                        <h4>Connect</h4>
+                        <div class="social-links">
+                            <a href="#"><i class="fab fa-github"></i></a>
+                            <a href="#"><i class="fab fa-linkedin"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Chimera. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="email-checker.js"></script>
+</body>
+</html>

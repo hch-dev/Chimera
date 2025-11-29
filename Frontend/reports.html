@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports Dashboard - Chimera</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header Navigation -->
+    <header class="header">
+        <nav class="nav">
+            <div class="nav-container">
+                <div class="logo">
+                    <span>Chimera</span>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="scan.html">URL Scanner</a></li>
+                    <li><a href="email-check.html">Email Checker</a></li>
+                    <li><a href="learn.html">Awareness Hub</a></li>
+                    <li><a href="report.html">Report Suspicious Site</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+                <div class="nav-actions">
+                    <button class="theme-toggle" id="themeToggle">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <a href="login.html" class="btn btn-outline btn-sm">Login</a>
+                </div>
+                <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Dashboard Section -->
+    <main class="dashboard-main">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1>Reports Dashboard</h1>
+                <p>Track your scanning history and phishing detection trends</p>
+            </div>
+
+            <!-- Overview Stats -->
+            <section class="overview-stats">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="totalScans">0</div>
+                            <div class="stat-label">Total Scans</div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-arrow-up"></i>
+                                <span>12% from last week</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-shield-virus"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="threatsDetected">0</div>
+                            <div class="stat-label">Threats Detected</div>
+                            <div class="stat-change negative">
+                                <i class="fas fa-arrow-down"></i>
+                                <span>5% from last week</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-percentage"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="threatRate">0%</div>
+                            <div class="stat-label">Threat Rate</div>
+                            <div class="stat-change neutral">
+                                <i class="fas fa-minus"></i>
+                                <span>No change</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="lastScan">Today</div>
+                            <div class="stat-label">Last Scan</div>
+                            <div class="stat-change">
+                                <i class="fas fa-info-circle"></i>
+                                <span>2 hours ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Charts Section -->
+            <section class="charts-section">
+                <div class="charts-grid">
+                    <!-- Phishing Trend Chart -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>Phishing Detection Trend</h3>
+                            <div class="chart-controls">
+                                <select id="trendPeriod" class="period-select">
+                                    <option value="7">Last 7 days</option>
+                                    <option value="30" selected>Last 30 days</option>
+                                    <option value="90">Last 90 days</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="trendChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Risk Distribution Chart -->
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>Risk Level Distribution</h3>
+                            <div class="chart-legend">
+                                <div class="legend-item">
+                                    <span class="legend-color safe"></span>
+                                    <span>Safe</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-color warning"></span>
+                                    <span>Medium</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-color danger"></span>
+                                    <span>High Risk</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="distributionChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Recent Scans Table -->
+            <section class="recent-scans">
+                <div class="section-header">
+                    <h2>Recent Scans</h2>
+                    <div class="table-controls">
+                        <input type="text" id="searchScans" placeholder="Search scans..." class="search-input">
+                        <button class="btn btn-primary" onclick="exportData()">
+                            <i class="fas fa-download"></i>
+                            Export Data
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="scans-table">
+                        <thead>
+                            <tr>
+                                <th>Date/Time</th>
+                                <th>Type</th>
+                                <th>Target</th>
+                                <th>Risk Level</th>
+                                <th>Score</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scansTableBody">
+                            <!-- Table rows will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="table-pagination">
+                    <div class="pagination-info">
+                        Showing <span id="showingStart">1</span> to <span id="showingEnd">10</span> of <span id="totalRecords">0</span> entries
+                    </div>
+                    <div class="pagination-controls">
+                        <button class="btn btn-secondary" onclick="previousPage()" id="prevBtn" disabled>
+                            <i class="fas fa-chevron-left"></i>
+                            Previous
+                        </button>
+                        <div class="page-numbers" id="pageNumbers">
+                            <!-- Page numbers will be populated by JavaScript -->
+                        </div>
+                        <button class="btn btn-secondary" onclick="nextPage()" id="nextBtn">
+                            Next
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Statistics Summary -->
+            <section class="stats-summary">
+                <h2>Detailed Statistics</h2>
+                <div class="summary-grid">
+                    <div class="summary-card">
+                        <h3>Scan Types</h3>
+                        <div class="summary-content">
+                            <div class="summary-item">
+                                <span class="summary-label">URL Scans</span>
+                                <span class="summary-value" id="urlScans">0</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Email Checks</span>
+                                <span class="summary-value" id="emailChecks">0</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">File Analysis</span>
+                                <span class="summary-value" id="fileAnalysis">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="summary-card">
+                        <h3>Top Threat Categories</h3>
+                        <div class="summary-content">
+                            <div class="threat-item">
+                                <span class="threat-name">Suspicious URLs</span>
+                                <div class="threat-bar">
+                                    <div class="threat-fill" style="width: 45%"></div>
+                                    <span class="threat-count">45%</span>
+                                </div>
+                            </div>
+                            <div class="threat-item">
+                                <span class="threat-name">Phishing Emails</span>
+                                <div class="threat-bar">
+                                    <div class="threat-fill" style="width: 30%"></div>
+                                    <span class="threat-count">30%</span>
+                                </div>
+                            </div>
+                            <div class="threat-item">
+                                <span class="threat-name">Malicious Attachments</span>
+                                <div class="threat-bar">
+                                    <div class="threat-fill" style="width: 15%"></div>
+                                    <span class="threat-count">15%</span>
+                                </div>
+                            </div>
+                            <div class="threat-item">
+                                <span class="threat-name">Spoofed Domains</span>
+                                <div class="threat-bar">
+                                    <div class="threat-fill" style="width: 10%"></div>
+                                    <span class="threat-count">10%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="summary-card">
+                        <h3>Time-based Analysis</h3>
+                        <div class="summary-content">
+                            <div class="time-item">
+                                <span class="time-label">Most Active Hour</span>
+                                <span class="time-value">2:00 PM - 4:00 PM</span>
+                            </div>
+                            <div class="time-item">
+                                <span class="time-label">Most Active Day</span>
+                                <span class="time-value">Tuesday</span>
+                            </div>
+                            <div class="time-item">
+                                <span class="time-label">Average Scan Time</span>
+                                <span class="time-value">2.3 seconds</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="logo">
+                        <span>Chimera</span>
+                    </div>
+                    <p>Smart Phishing Detection & Prevention</p>
+                </div>
+                <div class="footer-links">
+                    <div class="link-group">
+                        <h4>Product</h4>
+                        <ul>
+                            <li><a href="scan.html">URL Scanner</a></li>
+                            <li><a href="email-check.html">Email Checker</a></li>
+                            <li><a href="reports.html">Reports Dashboard</a></li>
+                        </ul>
+                    </div>
+                    <div class="link-group">
+                        <h4>Resources</h4>
+                        <ul>
+                            <li><a href="learn.html">Awareness Hub</a></li>
+                            <li><a href="report.html">Report Suspicious Site</a></li>
+                            <li><a href="contact.html">Contact Support</a></li>
+                        </ul>
+                    </div>
+                    <div class="link-group">
+                        <h4>Connect</h4>
+                        <div class="social-links">
+                            <a href="#"><i class="fab fa-github"></i></a>
+                            <a href="#"><i class="fab fa-linkedin"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Chimera. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="reports.js"></script>
+</body>
+</html>

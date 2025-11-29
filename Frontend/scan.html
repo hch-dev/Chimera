@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Phishing Scanner - Chimera</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header Navigation -->
+    <header class="header">
+        <nav class="nav">
+            <div class="nav-container">
+                <div class="logo">
+                    <span>Chimera</span>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="scan.html" class="active">URL Scanner</a></li>
+                    <li><a href="email-check.html">Email Checker</a></li>
+                    <li><a href="learn.html">Awareness Hub</a></li>
+                    <li><a href="report.html">Report Suspicious Site</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+                <div class="nav-actions">
+                    <button class="theme-toggle" id="themeToggle">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <a href="login.html" class="btn btn-outline btn-sm">Login</a>
+                </div>
+                <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Scanner Section -->
+    <main class="scanner-main">
+        <div class="container">
+            <div class="scanner-header">
+                <h1>URL Phishing Scanner</h1>
+                <p>Analyze any URL for phishing threats, malicious patterns, and security risks</p>
+            </div>
+
+            <!-- URL Input Section -->
+            <section class="url-input-section">
+                <div class="scanner-card">
+                    <div class="input-group">
+                        <label for="urlInput">Enter URL to Scan</label>
+                        <div class="url-input-wrapper">
+                            <input type="text" id="urlInput" placeholder="https://example.com" class="url-input">
+                            <button id="scanBtn" class="btn btn-primary scan-button">
+                                <i class="fas fa-search"></i>
+                                Scan Now
+                            </button>
+                        </div>
+                        <div class="input-suggestions">
+                            <span class="suggestion-text">Try these examples:</span>
+                            <div class="suggestion-row">
+                                <button class="suggestion-btn" onclick="setExampleUrl('https://google.com')">https://google.com</button>
+                            </div>
+                            <div class="suggestion-row">
+                                <button class="suggestion-btn" onclick="setExampleUrl('https://microsoft.com')">https://microsoft.com</button>
+                                <button class="suggestion-btn" onclick="setExampleUrl('http://suspicious-site123.com')">http://suspicious-site123.com</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Loading State -->
+            <section id="loadingSection" class="loading-section" style="display: none;">
+                <div class="loading-card">
+                    <div class="scanner-animation-large">
+                        <div class="scanner-circle-large"></div>
+                        <div class="scanner-wave-large"></div>
+                        <i class="fas fa-shield-virus scanner-icon-large"></i>
+                    </div>
+                    <h3>Scanning URL...</h3>
+                    <p>Analyzing security patterns and checking against threat databases</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section id="resultsSection" class="results-section" style="display: none;">
+                <!-- Risk Score Card -->
+                <div class="risk-score-card">
+                    <div class="risk-score-header">
+                        <h2>Risk Assessment</h2>
+                        <div id="riskBadge" class="risk-badge">
+                            <i class="fas fa-shield-check"></i>
+                            <span id="riskLevel">Safe</span>
+                        </div>
+                    </div>
+                    <div class="risk-score-display">
+                        <div class="score-circle">
+                            <span id="scoreValue">85</span>
+                            <span class="score-label">Safety Score</span>
+                        </div>
+                        <div class="score-details">
+                            <div class="score-item">
+                                <span class="score-label">Threat Level</span>
+                                <span id="threatLevel" class="score-value">Low</span>
+                            </div>
+                            <div class="score-item">
+                                <span class="score-label">Confidence</span>
+                                <span id="confidenceLevel" class="score-value">95%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analysis Details -->
+                <div class="analysis-details">
+                    <h3>Security Analysis</h3>
+                    <div class="analysis-grid">
+                        <div class="analysis-item">
+                            <div class="analysis-icon">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                            <div class="analysis-content">
+                                <h4>SSL Certificate</h4>
+                                <p id="sslStatus">Valid SSL certificate detected</p>
+                                <div class="status-indicator safe"></div>
+                            </div>
+                        </div>
+                        <div class="analysis-item">
+                            <div class="analysis-icon">
+                                <i class="fas fa-calendar"></i>
+                            </div>
+                            <div class="analysis-content">
+                                <h4>Domain Age</h4>
+                                <p id="domainAge">Domain registered 5+ years ago</p>
+                                <div class="status-indicator safe"></div>
+                            </div>
+                        </div>
+                        <div class="analysis-item">
+                            <div class="analysis-icon">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="analysis-content">
+                                <h4>Suspicious Patterns</h4>
+                                <p id="suspiciousPatterns">No suspicious patterns detected</p>
+                                <div class="status-indicator safe"></div>
+                            </div>
+                        </div>
+                        <div class="analysis-item">
+                            <div class="analysis-icon">
+                                <i class="fas fa-spider"></i>
+                            </div>
+                            <div class="analysis-content">
+                                <h4>Malicious Keywords</h4>
+                                <p id="maliciousKeywords">No malicious keywords found</p>
+                                <div class="status-indicator safe"></div>
+                            </div>
+                        </div>
+                        <div class="analysis-item">
+                            <div class="analysis-icon">
+                                <i class="fas fa-random"></i>
+                            </div>
+                            <div class="analysis-content">
+                                <h4>Redirect Behavior</h4>
+                                <p id="redirectBehavior">No suspicious redirects detected</p>
+                                <div class="status-indicator safe"></div>
+                            </div>
+                        </div>
+                        <div class="analysis-item">
+                            <div class="analysis-icon">
+                                <i class="fas fa-globe"></i>
+                            </div>
+                            <div class="analysis-content">
+                                <h4>Blacklist Status</h4>
+                                <p id="blacklistStatus">Not found on any blacklists</p>
+                                <div class="status-indicator safe"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recommendations -->
+                <div class="recommendations-card">
+                    <h3>Safety Recommendations</h3>
+                    <div id="recommendationsList" class="recommendations-list">
+                        <div class="recommendation-item safe">
+                            <i class="fas fa-check-circle"></i>
+                            <span>This website appears to be safe for browsing</span>
+                        </div>
+                        <div class="recommendation-item info">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Always verify the URL before entering sensitive information</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button onclick="scanAnother()" class="btn btn-secondary">
+                        <i class="fas fa-redo"></i>
+                        Scan Another URL
+                    </button>
+                    <button onclick="reportSuspicious()" class="btn btn-outline">
+                        <i class="fas fa-flag"></i>
+                        Report Suspicious
+                    </button>
+                    <button onclick="exportReport()" class="btn btn-outline">
+                        <i class="fas fa-download"></i>
+                        Export Report
+                    </button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="logo">
+                        <span>Chimera</span>
+                    </div>
+                    <p>Smart Phishing Detection & Prevention</p>
+                </div>
+                <div class="footer-links">
+                    <div class="link-group">
+                        <h4>Product</h4>
+                        <ul>
+                            <li><a href="scan.html">URL Scanner</a></li>
+                            <li><a href="email-check.html">Email Checker</a></li>
+                            <li><a href="reports.html">Reports Dashboard</a></li>
+                        </ul>
+                    </div>
+                    <div class="link-group">
+                        <h4>Resources</h4>
+                        <ul>
+                            <li><a href="learn.html">Awareness Hub</a></li>
+                            <li><a href="report.html">Report Suspicious Site</a></li>
+                            <li><a href="contact.html">Contact Support</a></li>
+                        </ul>
+                    </div>
+                    <div class="link-group">
+                        <h4>Connect</h4>
+                        <div class="social-links">
+                            <a href="#"><i class="fab fa-github"></i></a>
+                            <a href="#"><i class="fab fa-linkedin"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Chimera. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="scanner.js"></script>
+</body>
+</html>
