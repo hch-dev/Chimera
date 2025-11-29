@@ -1,0 +1,15 @@
+joblib
+numpy
+scikit-learn
+tldextract
+requests
+dnspython
+python-whois
+beautifulsoup4
+lxml
+validators
+pydantic
+loguru
+shap
+cryptography
+pandas
