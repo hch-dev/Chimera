@@ -20,8 +20,13 @@
                     <li><a href="scan.html" class="active">URL Scanner</a></li>
                     <li><a href="email-check.html">Email Checker</a></li>
                     <li><a href="learn.html">Awareness Hub</a></li>
+                    <li><a href="report.html">Report Suspicious Site</a></li>
                     <li><a href="contact.html">Contact</a></li>
                 </ul>
+                <div class="nav-actions">
+                    <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
+                    <a href="login.html" class="btn btn-outline btn-sm">Login</a>
+                </div>
             </div>
         </nav>
     </header>
@@ -43,7 +48,6 @@
                                 <i class="fas fa-search"></i> Scan Now
                             </button>
                         </div>
-
                         <div class="input-suggestions">
                             <span class="suggestion-text">Try these examples:</span>
                             <div class="suggestion-row">
@@ -57,12 +61,11 @@
 
             <section id="loadingSection" class="loading-section" style="display: none;">
                 <div class="loading-card">
-                    <div class="scanner-animation">
-                        <div class="scanner-circle"></div>
-                        <i class="fas fa-shield-virus scanner-icon"></i>
-                    </div>
-                    <h3>Scanning URL...</h3>
+                    <h3 class="pulsing-text">Scanning URL...</h3>
                     <p>Analyzing security patterns and checking against threat databases</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
                 </div>
             </section>
 
@@ -75,7 +78,6 @@
                             <span id="riskLevel">Safe</span>
                         </div>
                     </div>
-
                     <div class="risk-score-display">
                         <div class="score-circle">
                             <div class="score-text-wrapper">
@@ -88,60 +90,67 @@
                                 <span class="score-label">Threat Level</span>
                                 <span id="threatLevel" class="score-value">Low</span>
                             </div>
-                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <div class="analysis-details">
                     <h3>Security Analysis</h3>
                     <div class="analysis-grid">
+
                         <div class="analysis-item" id="card-ssl">
                             <div class="analysis-icon"><i class="fas fa-lock"></i></div>
-                            <div class="analysis-content">
-                                <h4>SSL Certificate</h4>
-                                <p id="sslStatus">Loading...</p>
-                            </div>
+                            <div class="analysis-content"><h4>SSL Certificate</h4><p id="sslStatus">...</p></div>
                         </div>
-
                         <div class="analysis-item" id="card-age">
                             <div class="analysis-icon"><i class="fas fa-calendar"></i></div>
-                            <div class="analysis-content">
-                                <h4>Domain Age</h4>
-                                <p id="domainAge">Loading...</p>
-                            </div>
+                            <div class="analysis-content"><h4>Domain Age</h4><p id="domainAge">...</p></div>
                         </div>
-
-                        <div class="analysis-item" id="card-patterns">
-                            <div class="analysis-icon"><i class="fas fa-exclamation-triangle"></i></div>
-                            <div class="analysis-content">
-                                <h4>Suspicious Patterns</h4>
-                                <p id="suspiciousPatterns">Loading...</p>
-                            </div>
-                        </div>
-
-                        <div class="analysis-item" id="card-keywords">
-                            <div class="analysis-icon"><i class="fas fa-spider"></i></div>
-                            <div class="analysis-content">
-                                <h4>Hidden Keywords</h4>
-                                <p id="maliciousKeywords">Loading...</p>
-                            </div>
-                        </div>
-
-                        <div class="analysis-item" id="card-redirects">
-                            <div class="analysis-icon"><i class="fas fa-random"></i></div>
-                            <div class="analysis-content">
-                                <h4>Redirect Chain</h4>
-                                <p id="redirectBehavior">Loading...</p>
-                            </div>
-                        </div>
-
                         <div class="analysis-item" id="card-blacklist">
                             <div class="analysis-icon"><i class="fas fa-globe"></i></div>
-                            <div class="analysis-content">
-                                <h4>Threat Intel</h4>
-                                <p id="blacklistStatus">Loading...</p>
-                            </div>
+                            <div class="analysis-content"><h4>Threat Intel</h4><p id="blacklistStatus">...</p></div>
                         </div>
+                        <div class="analysis-item" id="card-redirects">
+                            <div class="analysis-icon"><i class="fas fa-random"></i></div>
+                            <div class="analysis-content"><h4>Redirect Chain</h4><p id="redirectBehavior">...</p></div>
+                        </div>
+                        <div class="analysis-item" id="card-homoglyph">
+                            <div class="analysis-icon"><i class="fas fa-font"></i></div>
+                            <div class="analysis-content"><h4>Homoglyph Attack</h4><p id="homoglyphStatus">...</p></div>
+                        </div>
+                        <div class="analysis-item" id="card-favicon">
+                            <div class="analysis-icon"><i class="fas fa-image"></i></div>
+                            <div class="analysis-content"><h4>Favicon Match</h4><p id="faviconStatus">...</p></div>
+                        </div>
+                        <div class="analysis-item" id="card-abuse">
+                            <div class="analysis-icon"><i class="fas fa-mask"></i></div>
+                            <div class="analysis-content"><h4>Domain Abuse</h4><p id="abuseStatus">...</p></div>
+                        </div>
+                        <div class="analysis-item" id="card-obfuscation">
+                            <div class="analysis-icon"><i class="fas fa-code"></i></div>
+                            <div class="analysis-content"><h4>Obfuscation</h4><p id="obfuscationStatus">...</p></div>
+                        </div>
+                        <div class="analysis-item" id="card-flux">
+                            <div class="analysis-icon"><i class="fas fa-network-wired"></i></div>
+                            <div class="analysis-content"><h4>DNS Fast Flux</h4><p id="fluxStatus">...</p></div>
+                        </div>
+                        <div class="analysis-item" id="card-datauri">
+                            <div class="analysis-icon"><i class="fas fa-file-code"></i></div>
+                            <div class="analysis-content"><h4>Data URI</h4><p id="dataUriStatus">...</p></div>
+                        </div>
+                        <div class="analysis-item" id="card-random">
+                            <div class="analysis-icon"><i class="fas fa-dice"></i></div>
+                            <div class="analysis-content"><h4>Random Domain</h4><p id="randomStatus">...</p></div>
+                        </div>
+                        <div class="analysis-item" id="card-structure">
+                            <div class="analysis-icon"><i class="fas fa-sitemap"></i></div>
+                            <div class="analysis-content"><h4>URL Structure</h4><p id="structureStatus">...</p></div>
+                        </div>
+                        <div class="analysis-item" id="card-path">
+                            <div class="analysis-icon"><i class="fas fa-folder-open"></i></div>
+                            <div class="analysis-content"><h4>Path Analysis</h4><p id="pathStatus">...</p></div>
+                        </div>
+
                     </div>
                 </div>
 
@@ -164,7 +173,42 @@
 
     <footer class="footer">
         <div class="container">
-            <p style="text-align:center; color: #666; margin-top:2rem;">&copy; 2025 Chimera.</p>
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="logo">
+                        <span>Chimera</span>
+                    </div>
+                    <p>Smart Phishing Detection & Prevention</p>
+                </div>
+                <div class="footer-links">
+                    <div class="link-group">
+                        <h4>Product</h4>
+                        <ul>
+                            <li><a href="scan.html">URL Scanner</a></li>
+                            <li><a href="email-check.html">Email Checker</a></li>
+                            <li><a href="reports.html">Reports Dashboard</a></li>
+                        </ul>
+                    </div>
+                    <div class="link-group">
+                        <h4>Resources</h4>
+                        <ul>
+                            <li><a href="learn.html">Awareness Hub</a></li>
+                            <li><a href="report.html">Report Suspicious Site</a></li>
+                            <li><a href="contact.html">Contact Support</a></li>
+                        </ul>
+                    </div>
+                    <div class="link-group">
+                        <h4>Connect</h4>
+                        <div class="social-links">
+                            <a href="#"><i class="fab fa-github"></i></a>
+                            <a href="#"><i class="fab fa-linkedin"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Chimera. All rights reserved.</p>
+            </div>
         </div>
     </footer>
 

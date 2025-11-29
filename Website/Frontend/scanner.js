@@ -1,22 +1,18 @@
+// Scanner Page Logic
 const API_URL = "http://127.0.0.1:8000/scan";
 
 document.addEventListener('DOMContentLoaded', () => {
-    const urlFromSession = sessionStorage.getItem('scanUrl');
-    if (urlFromSession) {
-        document.getElementById('urlInput').value = urlFromSession;
+    const sessionUrl = sessionStorage.getItem('scanUrl');
+    if (sessionUrl) {
+        document.getElementById('urlInput').value = sessionUrl;
         sessionStorage.removeItem('scanUrl');
-        setTimeout(() => performScan(), 500);
+        setTimeout(performScan, 500);
     }
 
-    const scanBtn = document.getElementById('scanBtn');
-    const urlInput = document.getElementById('urlInput');
-
-    if (scanBtn) scanBtn.addEventListener('click', performScan);
-    if (urlInput) {
-        urlInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') performScan();
-        });
-    }
+    document.getElementById('scanBtn').addEventListener('click', performScan);
+    document.getElementById('urlInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') performScan();
+    });
 });
 
 function setExampleUrl(url) {
@@ -25,42 +21,51 @@ function setExampleUrl(url) {
 }
 
 async function performScan() {
-    const urlInput = document.getElementById('urlInput');
-    const url = urlInput.value.trim();
+    const url = document.getElementById('urlInput').value.trim();
+    if (!url) return alert('Please enter a URL');
 
-    if (!url || !isValidURL(url)) {
-        alert('Please enter a valid URL');
-        return;
-    }
-
-    // UI State: Loading
+    // Show Loading
     document.querySelector('.url-input-section').style.display = 'none';
-    document.getElementById('loadingSection').style.display = 'block';
+    document.getElementById('loadingSection').style.display = 'flex';
     document.getElementById('resultsSection').style.display = 'none';
 
+    // Fake Animation
+    const bar = document.querySelector('.progress-fill');
+    bar.style.width = '10%';
+    let w = 10;
+    const timer = setInterval(() => { if(w < 90) bar.style.width = (w += 5) + '%'; }, 200);
+
     try {
-        const response = await fetch(API_URL, {
+        const res = await fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ url: url })
         });
 
-        if (!response.ok) throw new Error("Server Error");
+        if (!res.ok) throw new Error("Backend Error");
+        const data = await res.json();
 
-        const backendData = await response.json();
+        clearInterval(timer);
+        bar.style.width = '100%';
 
-        // Simulate tiny delay for smoother transition
         setTimeout(() => {
-            const uiData = mapBackendToUI(backendData, url);
-            showResults(uiData);
+            renderResults(data, url);
             document.getElementById('loadingSection').style.display = 'none';
-        }, 800);
+            document.getElementById('resultsSection').style.display = 'block';
+        }, 500);
 
-    } catch (error) {
-        console.error(error);
+    } catch (err) {
+        clearInterval(timer);
+        console.error(err);
         document.querySelector('.url-input-section').style.display = 'block';
         document.getElementById('loadingSection').style.display = 'none';
-        alert('Backend not reachable. Ensure server.py is running.');
+
+        // Notification Fallback
+        if(typeof showNotification === 'function') {
+            showNotification('Backend not reachable. Is server.py running?', 'error');
+        } else {
+            alert('Backend not reachable. Is Python running?');
+        }
     }
 }
 
@@ -71,143 +76,109 @@ function formatText(text) {
     .replace(/Ssl/g, "SSL").replace(/Url/g, "URL");
 }
 
-function mapBackendToUI(data, originalUrl) {
-    const isPhishing = data.verdict === "PHISHING";
-    const isSuspicious = data.verdict === "SUSPICIOUS";
+function renderResults(data, url) {
+    // 1. Risk Logic
+    const isBad = data.verdict !== "SAFE";
+    const riskClass = isBad ? (data.final_score > 80 ? 'danger' : 'warning') : 'safe';
+    const riskLabel = isBad ? (data.final_score > 80 ? 'CRITICAL' : 'SUSPICIOUS') : 'SAFE';
 
-    let riskLevel = 'Low';
-    let riskClass = 'safe';
+    // Safety Score (Invert Risk Score)
+    const safetyScore = Math.max(0, 100 - Math.round(data.confidence || data.final_score));
 
-    if (isPhishing) {
-        riskLevel = 'Critical';
-        riskClass = 'danger';
-    } else if (isSuspicious) {
-        riskLevel = 'Medium';
-        riskClass = 'warning';
-    }
+    // 2. Header & Circle
+    const badge = document.getElementById('riskBadge');
+    badge.className = `risk-badge ${riskClass}`;
+    badge.innerHTML = `<i class="fas ${isBad ? 'fa-exclamation-triangle' : 'fa-check-circle'}"></i> ${riskLabel}`;
 
-    const d = data.details || {};
-    const getMsg = (key) => d[key]?.message || 'Clean';
-
-    let finalScore = Math.round(data.confidence) || 0;
-    let safetyScore = 100 - finalScore;
-    if (safetyScore < 0) safetyScore = 0;
-
-    return {
-        url: originalUrl,
-        riskScore: safetyScore,
-        rawRisk: finalScore,
-        riskLevel: riskLevel,
-        riskClass: riskClass,
-
-        ssl: formatText(getMsg('ssl_presence_and_validity')),
-        domainAge: formatText(getMsg('domain_age_analysis')),
-        suspiciousPatterns: formatText(getMsg('homoglyph_impersonation')),
-        maliciousKeywords: formatText(getMsg('obfuscation_analysis')),
-        redirectBehavior: formatText(getMsg('open_redirect_detection')),
-        blacklistStatus: formatText(getMsg('threat_intelligence'))
-    };
-}
-
-function showResults(results) {
-    // 1. Risk Badge
-    const riskBadge = document.getElementById('riskBadge');
-    const icon = results.riskClass === 'safe' ? 'fa-check-circle' : 'fa-exclamation-triangle';
-    riskBadge.className = `risk-badge ${results.riskClass}`;
-    riskBadge.innerHTML = `<i class="fas ${icon}"></i> ${results.riskLevel} Risk`;
-
-    // 2. Score Circle
-    document.getElementById('scoreValue').textContent = results.riskScore;
-    document.getElementById('threatLevel').textContent = results.riskLevel;
-
-    // Removed Confidence Level assignment here as requested
+    document.getElementById('scoreValue').textContent = safetyScore;
+    document.getElementById('threatLevel').textContent = riskLabel;
 
     const circle = document.querySelector('.score-circle');
-    let color = '#28a745'; // Green
-    if (results.riskClass === 'warning') color = '#ffc107';
-    if (results.riskClass === 'danger') color = '#dc3545';
-    if (circle) circle.style.background = `conic-gradient(${color} ${results.riskScore}%, var(--bg-tertiary) 0)`;
+    let color = riskClass === 'safe' ? '#28a745' : (riskClass === 'warning' ? '#ffc107' : '#dc3545');
+    circle.style.background = `conic-gradient(${color} ${safetyScore}%, var(--bg-tertiary) 0)`;
 
-    // 3. Analysis Details (With Filtering Logic)
-    updateAnalysisGrid(results);
+    // 3. Update Analysis Grid (With Filtering)
+    const d = data.details || {};
+
+    // Pass 'isBad' to the update function to trigger hiding logic
+    updateCard('card-ssl', 'sslStatus', d.ssl_presence_and_validity, isBad);
+    updateCard('card-age', 'domainAge', d.domain_age_analysis, isBad);
+    updateCard('card-redirects', 'redirectBehavior', d.open_redirect_detection, isBad);
+    updateCard('card-blacklist', 'blacklistStatus', d.threat_intelligence, isBad);
+    updateCard('card-homoglyph', 'homoglyphStatus', d.homoglyph_impersonation, isBad);
+    updateCard('card-favicon', 'faviconStatus', d.favicon_mismatch, isBad);
+    updateCard('card-abuse', 'abuseStatus', d.domain_abuse_detection, isBad);
+    updateCard('card-obfuscation', 'obfuscationStatus', d.obfuscation_analysis, isBad);
+    updateCard('card-flux', 'fluxStatus', d.fast_flux_dns, isBad);
+    updateCard('card-datauri', 'dataUriStatus', d.data_uri_scheme, isBad);
+    updateCard('card-random', 'randomStatus', d.random_domain_detection, isBad);
+    updateCard('card-structure', 'structureStatus', d.url_structure_analysis, isBad);
+    updateCard('card-path', 'pathStatus', d.path_anomaly_detection, isBad);
 
     // 4. Recommendations
-    updateRecommendations(results);
-
-    document.getElementById('resultsSection').style.display = 'block';
-}
-
-function updateAnalysisGrid(results) {
-    // Helper to determine if a specific text indicates a problem
-    const isBad = (text) => {
-        const t = text.toLowerCase();
-        return t.includes('invalid') || t.includes('missing') || t.includes('detected') ||
-        t.includes('found') || t.includes('mismatch') || t.includes('high');
-    };
-
-    // Helper to update text and visibility
-    const updateCard = (cardId, textId, text) => {
-        const card = document.getElementById(cardId);
-        const p = document.getElementById(textId);
-
-        if (!card || !p) return;
-
-        p.textContent = text;
-
-        // Color logic
-        const bad = isBad(text);
-        p.className = bad ? 'text-danger' : 'text-success';
-
-        // VISIBILITY LOGIC (Change #4)
-        // If site is SAFE: Show everything (so user sees why it's safe)
-        // If site is PHISHING/WARNING: Hide the "Safe" cards, only show the "Bad" cards.
-        if (results.riskClass !== 'safe' && !bad) {
-            card.style.display = 'none'; // Hide good news on a bad site
-        } else {
-            card.style.display = 'flex'; // Show otherwise
-        }
-    };
-
-    updateCard('card-ssl', 'sslStatus', results.ssl);
-    updateCard('card-age', 'domainAge', results.domainAge);
-    updateCard('card-patterns', 'suspiciousPatterns', results.suspiciousPatterns);
-    updateCard('card-keywords', 'maliciousKeywords', results.maliciousKeywords);
-    updateCard('card-redirects', 'redirectBehavior', results.redirectBehavior);
-    updateCard('card-blacklist', 'blacklistStatus', results.blacklistStatus);
-}
-
-function updateRecommendations(results) {
     const list = document.getElementById('recommendationsList');
-    let items = [];
-
-    if (results.riskClass === 'safe') {
-        items = [
-            { type: 'safe', icon: 'fa-check-circle', text: 'This URL appears safe.' },
-            { type: 'info', icon: 'fa-lock', text: 'SSL is valid and domain is established.' }
-        ];
+    if (isBad) {
+        list.innerHTML = `
+        <div class="recommendation-item danger">
+        <i class="fas fa-ban"></i>
+        <span><b>DO NOT VISIT:</b> High probability of phishing detected.</span>
+        </div>
+        <div class="recommendation-item warning">
+        <i class="fas fa-user-shield"></i>
+        <span>If you entered data here recently, change your passwords immediately.</span>
+        </div>`;
     } else {
-        items = [
-            { type: 'danger', icon: 'fa-ban', text: 'CRITICAL THREAT: Do not visit this link.' },
-            { type: 'danger', icon: 'fa-user-secret', text: 'Phishing indicators found.' }
-        ];
+        list.innerHTML = `
+        <div class="recommendation-item safe">
+        <i class="fas fa-check-circle"></i>
+        <span>This website appears to be safe for browsing.</span>
+        </div>
+        <div class="recommendation-item">
+        <i class="fas fa-info-circle"></i>
+        <span>Always verify the URL before entering sensitive information.</span>
+        </div>`;
     }
+}
 
-    list.innerHTML = items.map(item => `
-    <div class="recommendation-item ${item.type}">
-    <i class="fas ${item.icon}"></i> <span>${item.text}</span>
-    </div>
-    `).join('');
+// Logic: Hide Safe Cards if Site is BAD
+function updateCard(cardId, textId, feature, isSiteBad) {
+    const card = document.getElementById(cardId);
+    const p = document.getElementById(textId);
+
+    if (!feature || !card) return;
+
+    const msg = formatText(feature.message);
+    p.textContent = msg;
+
+    // Detect if this specific feature flagged an error
+    const isFeatureBad = feature.score > 0;
+
+    // Color text
+    p.className = isFeatureBad ? 'text-danger' : 'text-success';
+
+    // FILTERING LOGIC:
+    // 1. If Site is Phishing (isSiteBad = true):
+    //    - Show ONLY features that are bad (isFeatureBad = true).
+    //    - Hide everything else.
+    // 2. If Site is Safe (isSiteBad = false):
+    //    - Show everything (or at least the Green ones) to reassure user.
+
+    if (isSiteBad) {
+        if (isFeatureBad) {
+            card.classList.remove('d-none'); // Show the Red Flag
+        } else {
+            card.classList.add('d-none');    // Hide the Green Flag (Irrelevant info for a threat)
+        }
+    } else {
+        // Site is safe -> Show all cards so user sees what was checked
+        card.classList.remove('d-none');
+    }
 }
 
 function scanAnother() {
-    document.querySelector('.url-input-section').style.display = 'block';
-    document.getElementById('resultsSection').style.display = 'none';
-    document.getElementById('urlInput').value = '';
+    window.location.reload();
 }
 
 function reportSuspicious() {
-    window.location.href = 'report.html';
+    window.location.href = "report.html";
 }
-
-function saveScanToHistory(data) {} // Implemented in reports page
-function isValidURL(str) { try { new URL(str); return true; } catch{ return false; } }
