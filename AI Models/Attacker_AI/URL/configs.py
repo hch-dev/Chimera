@@ -19,7 +19,7 @@ class TrainingConfig:
     text_column_candidates: tuple = ("url", "URL", "Url")
     label_column_candidates: tuple = ("label", "Label")
     batch_size: int = 32
-    num_epochs: int = 3
+    num_epochs: int = 1
     lr: float = 3e-4
     save_dir: str = "models_url"
     save_every: int = 1

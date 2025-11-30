@@ -16,20 +16,39 @@ def load_and_tokenize(cfg: GeneratorConfig, tcfg: TrainingConfig):
     log(f"Loading dataset: {tcfg.dataset_name}")
     ds = load_dataset(tcfg.dataset_name, split="train")
 
-    # --- CRITICAL FIX: FILTER FOR PHISHING ONLY ---
-    # The RonakAJ dataset has a column "Email Type".
-    # Values are "Phishing Email" and "Safe Email".
-    if "Email Type" in ds.column_names:
-        original_count = len(ds)
-        log(f"Filtering dataset... (Original: {original_count})")
+    # --- UNIVERSAL FILTERING LOGIC ---
+    original_count = len(ds)
+    filtered = False
 
-        # Keep ONLY rows where Email Type is Phishing
+    # Case 1: renemel/compiled-phishing-dataset (Columns: 'text', 'type')
+    if "type" in ds.column_names:
+        log(f"Detected 'type' column. Filtering for 'phishing'...")
+        ds = ds.filter(lambda x: x["type"] == "phishing")
+        filtered = True
+
+    # Case 2: RonakAJ/phising_email (Columns: 'Email Text', 'Email Type')
+    elif "Email Type" in ds.column_names:
+        log(f"Detected 'Email Type' column. Filtering for 'Phishing Email'...")
         ds = ds.filter(lambda x: x["Email Type"] == "Phishing Email")
+        filtered = True
 
+    # Case 3: label column (Common standard, usually 1=Phishing)
+    elif "label" in ds.column_names:
+        # Check if it's an integer (1) or string ('phishing')
+        sample_val = ds[0]["label"]
+        if isinstance(sample_val, int):
+            log(f"Detected 'label' column (int). Assuming 1 = Phishing...")
+            ds = ds.filter(lambda x: x["label"] == 1)
+        elif isinstance(sample_val, str):
+             log(f"Detected 'label' column (str). Filtering for 'phishing'...")
+             ds = ds.filter(lambda x: x["label"].lower() == "phishing")
+        filtered = True
+
+    if filtered:
         new_count = len(ds)
         log(f"Dataset filtered. Keeping {new_count} Phishing examples (Dropped {original_count - new_count} safe emails)")
     else:
-        log("[WARN] Could not find 'Email Type' column to filter. Training on mixed data.")
+        log("[WARN] Could not identify a label column to filter! Training on MIXED data (Attacker might learn to be safe).")
     # ----------------------------------------------
 
     text_col = find_text_column(ds, tcfg.text_column_candidates)

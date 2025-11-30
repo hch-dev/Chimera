@@ -21,23 +21,23 @@ def main():
     device = torch.device(gcfg.device if torch.cuda.is_available() else "cpu")
     log(f"Using device: {device}")
 
-    # 1. Load (New) Dataset
+    # 1. Load Dataset & Tokenizer
     dataset, tokenizer = load_and_tokenize(gcfg, tcfg)
     dataloader = DataLoader(dataset, batch_size=tcfg.batch_size, shuffle=True, collate_fn=collate_batch)
 
-    # 2. Initialize Model Structure
+    # 2. Initialize Base Model
     model = GeneratorModel(max_length=gcfg.max_length)
 
-    # Resize embeddings to match tokenizer (50258)
+    # 3. Resize embeddings to match tokenizer (Critical for loading weights)
     new_vocab_size = len(tokenizer)
     model.gpt.resize_token_embeddings(new_vocab_size)
 
-    # --- CRITICAL UPDATE: RESUME LOGIC ---
+    # --- NEW: RESUME LOGIC ---
     if tcfg.resume_checkpoint and os.path.exists(tcfg.resume_checkpoint):
         log(f"♻️  Resuming training from: {tcfg.resume_checkpoint}")
         checkpoint = torch.load(tcfg.resume_checkpoint, map_location="cpu")
 
-        # Handle state dict variations
+        # Handle state dict structure
         if "model_state_dict" in checkpoint:
             state_dict = checkpoint["model_state_dict"]
         else:
@@ -45,18 +45,18 @@ def main():
 
         model.load_state_dict(state_dict)
         model.to(device)
-        log("✅ Previous 'Brain' loaded successfully. Improving it now...")
+        log("✅ Previous knowledge loaded! The model will now get smarter.")
     else:
         log("🆕 Starting training from scratch (Base GPT-2)...")
         model.to(device)
-    # -------------------------------------
+    # -------------------------
 
     criterion = nn.CrossEntropyLoss(ignore_index=tokenizer.pad_token_id)
     optimizer = torch.optim.AdamW(model.parameters(), lr=tcfg.lr)
 
     ensure_dir(tcfg.save_dir)
 
-    log(f"Starting training on {len(dataset)} examples...")
+    log(f"Starting Training on {len(dataset)} examples...")
     for epoch in range(1, tcfg.num_epochs + 1):
         model.train()
         total_loss = 0.0
@@ -85,11 +85,11 @@ def main():
         avg_loss = total_loss / max(1, steps)
         log(f"\n[EPOCH {epoch}/{tcfg.num_epochs}] avg_loss={avg_loss:.4f}")
 
-        # Overwrite the checkpoint so it keeps getting better
+        # Save regularly so you don't lose progress
         save_path = os.path.join(tcfg.save_dir, "generator_final.pt")
         torch.save(model.state_dict(), save_path)
 
-    log(f"Update complete. Model saved to: {save_path}")
+    log(f"Training complete. Updated model saved to: {save_path}")
 
 if __name__ == "__main__":
     main()

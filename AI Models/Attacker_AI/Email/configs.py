@@ -14,19 +14,19 @@ class GeneratorConfig:
 @dataclass
 class TrainingConfig:
     # --- DATASET SETTINGS ---
-    dataset_name: str = "RonakAJ/phising_email"
+    # Change this to your NEW dataset when you are ready
+    dataset_name: str = "renemel/compiled-phishing-dataset"
     text_column_candidates: list = ("text", "Email Text", "email_text")
 
     # --- TRAINING SETTINGS ---
     batch_size: int = 4
-    num_epochs: int = 3 # You can keep this low (1-3) for updates
-    lr: float = 2e-5    # LOWER LR for updating (so we don't break previous knowledge)
+    num_epochs: int = 3
+    lr: float = 2e-5    # LOWER learning rate to protect old knowledge
 
     save_dir: str = "models"
     save_every: int = 1
     seed: int = 42
 
-    # --- NEW: RESUME TRAINING ---
-    # Set this to the path of your last model to continue training.
-    # Set to None (or empty string) to start from scratch.
+    # --- NEW: RESUME CAPABILITY ---
+    # Path to your "smart" model. Set to None to start fresh.
     resume_checkpoint: str = "models/generator_final.pt"
