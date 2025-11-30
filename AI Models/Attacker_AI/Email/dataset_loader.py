@@ -10,29 +10,44 @@ def find_text_column(ds, candidates):
     for c in candidates:
         if c in ds.column_names:
             return c
-    for c in ds.column_names:
-        if isinstance(ds[c][0], str):
-            return c
     return None
 
 def load_and_tokenize(cfg: GeneratorConfig, tcfg: TrainingConfig):
     log(f"Loading dataset: {tcfg.dataset_name}")
     ds = load_dataset(tcfg.dataset_name, split="train")
+
+    # --- CRITICAL FIX: FILTER FOR PHISHING ONLY ---
+    # The RonakAJ dataset has a column "Email Type".
+    # Values are "Phishing Email" and "Safe Email".
+    if "Email Type" in ds.column_names:
+        original_count = len(ds)
+        log(f"Filtering dataset... (Original: {original_count})")
+
+        # Keep ONLY rows where Email Type is Phishing
+        ds = ds.filter(lambda x: x["Email Type"] == "Phishing Email")
+
+        new_count = len(ds)
+        log(f"Dataset filtered. Keeping {new_count} Phishing examples (Dropped {original_count - new_count} safe emails)")
+    else:
+        log("[WARN] Could not find 'Email Type' column to filter. Training on mixed data.")
+    # ----------------------------------------------
+
     text_col = find_text_column(ds, tcfg.text_column_candidates)
     if text_col is None:
         raise ValueError(f"No text column found. Columns: {ds.column_names}")
-    log(f"Found text column: {text_col}")
+
+    log(f"Using text column: {text_col}")
 
     log(f"Loading tokenizer: {cfg.model_name}")
     tokenizer = AutoTokenizer.from_pretrained(cfg.model_name)
 
-    # CRITICAL FIX: Add a real pad token so EOS is not ignored
     if tokenizer.pad_token is None:
         tokenizer.add_special_tokens({'pad_token': '<pad>'})
         log("Added special <pad> token to tokenizer.")
 
     def preprocess(examples):
         texts = examples[text_col]
+        # Handle None/Empty values
         texts = [t if isinstance(t, str) else "" for t in texts]
         enc = tokenizer(texts,
                         truncation=True,
