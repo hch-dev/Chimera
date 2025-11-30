@@ -1,21 +1,22 @@
-# configs_url.py
+# configs.py
 from dataclasses import dataclass
 
 @dataclass
-class GeneratorURLConfig:
+class GeneratorConfig:
+    # Changed from GeneratorURLConfig to match generator_inference.py
     model_name: str = "gpt2"
     max_length: int = 64
     d_model: int = 256
     nhead: int = 4
     num_layers: int = 2
     dropout: float = 0.1
-    device: str = "cpu"  # change to "cuda" if GPU is available
-
+    device: str = "cpu"  # Change to "cuda" if you have a GPU
 
 @dataclass
-class TrainingURLConfig:
-    dataset_name: str = "Mitake/PhishingURLsANDBenignURLs"  # example: "LuisM123/URL-Phishing-Dataset"
-    text_column_candidates: tuple = ("url", "URL", "Url")  # dataset column names
+class TrainingConfig:
+    # Changed from TrainingURLConfig to match train_gan.py
+    dataset_name: str = "Mitake/PhishingURLsANDBenignURLs"
+    text_column_candidates: tuple = ("url", "URL", "Url")
     label_column_candidates: tuple = ("label", "Label")
     batch_size: int = 32
     num_epochs: int = 3
