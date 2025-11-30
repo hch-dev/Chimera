@@ -1,8 +1,13 @@
 #Checks dns against open source threat intelligence like alienvault
 
+import os
 import requests
 import tldextract
 from log import get_logger
+from dotenv import load_dotenv
+
+load_dotenv()
+api_key = os.getenv("API_KEY")
 
 logger = get_logger(__name__)
 
@@ -10,13 +15,13 @@ FEATURE_NAME = "threat_intelligence"
 WEIGHT = 0.50 # High confidence because it's confirmed by others
 
 # Replace with your actual key
-OTX_API_KEY = "b89da2fdb63f943584d2aabfa800a78128051dcf7ef21bcadf1be26da38c8dd9"
+OTX_API_KEY = "{api_key}"
 
 def check_alienvault(indicator: str, indicator_type: str = 'domain') -> dict:
     """
     Queries AlienVault OTX for a domain or URL.
     """
-    if not OTX_API_KEY or OTX_API_KEY == "b89da2fdb63f943584d2aabfa800a78128051dcf7ef21bcadf1be26da38c8dd9":
+    if not OTX_API_KEY or OTX_API_KEY == "{api_key}":
         return None # Skip if no key configured
 
     url = f"https://otx.alienvault.com/api/v1/indicators/{indicator_type}/{indicator}/general"

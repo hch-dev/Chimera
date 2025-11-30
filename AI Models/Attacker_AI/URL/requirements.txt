@@ -1,0 +1,14 @@
+# Core Machine Learning Framework
+torch>=2.0.0
+
+# Hugging Face Ecosystem (For Tokenizers and Transformers)
+transformers>=4.30.0
+
+# For loading datasets (like 'Mitake/PhishingURLsANDBenignURLs')
+datasets>=2.14.0
+
+# Standard numerical operations (used in utils.py)
+numpy>=1.24.0
+
+# Optional: For faster tokenization if available on your OS
+tokenizers>=0.13.3
