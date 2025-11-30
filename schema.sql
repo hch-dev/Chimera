@@ -1,3 +1,4 @@
+# Add these classes to backend/database.py
 
 class User(Base):
     __tablename__ = "users"
