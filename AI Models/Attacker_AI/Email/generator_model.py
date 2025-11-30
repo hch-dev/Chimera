@@ -1,9 +1,4 @@
 # generator_model.py
-"""
-A small Transformer-based causal language model from scratch (Decoder-style).
-This is lightweight and works on CPU for small datasets.
-"""
-
 import torch
 import torch.nn as nn
 import math
@@ -16,9 +11,8 @@ class PositionalEncoding(nn.Module):
         div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model))
         pe[:, 0::2] = torch.sin(position * div_term)
         pe[:, 1::2] = torch.cos(position * div_term)
-        self.pe = pe.unsqueeze(0)  # (1, max_len, d_model)
+        self.pe = pe.unsqueeze(0)
     def forward(self, x):
-        # x shape: (batch, seq_len, d_model)
         return x + self.pe[:, :x.size(1), :].to(x.device)
 
 class GeneratorModel(nn.Module):
@@ -37,14 +31,26 @@ class GeneratorModel(nn.Module):
         # input_ids: (batch, seq)
         x = self.token_emb(input_ids) * math.sqrt(self.token_emb.embedding_dim)
         x = self.pos_enc(x)
-        # transformer expects (seq, batch, dim)
+
+        # Transformer expects (seq, batch, dim)
         x = x.permute(1,0,2)
-        # build src_key_padding_mask from attention_mask if given
+
+        # 1. Padding Mask (Existing logic)
         src_key_padding_mask = None
         if attention_mask is not None:
-            src_key_padding_mask = attention_mask == 0  # True where padded
-        out = self.transformer(x, src_key_padding_mask=src_key_padding_mask)
+            # In PyTorch, True means "ignore this token" (padding)
+            src_key_padding_mask = attention_mask == 0
+
+        # 2. Causal Mask (CRITICAL FIX)
+        # Prevents the model from seeing future tokens.
+        seq_len = x.size(0)
+        # Create a square matrix where upper triangle is -inf
+        causal_mask = torch.triu(torch.ones(seq_len, seq_len, device=x.device) * float('-inf'), diagonal=1)
+
+        # Pass both masks to the transformer
+        out = self.transformer(x, mask=causal_mask, src_key_padding_mask=src_key_padding_mask)
+
         out = out.permute(1,0,2)  # back to (batch, seq, dim)
         out = self.ln(out)
-        logits = self.head(out)   # (batch, seq, vocab)
+        logits = self.head(out)
         return logits
