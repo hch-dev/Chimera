@@ -1,0 +1,16 @@
+importScripts("../utils/messaging.js");
+importScripts("../api/detector.js");
+
+chrome.runtime.onMessage.addListener(async (msg, sender, sendResponse) => {  
+  if (msg.action === "analyze_url") {
+    const result = await detectURL(msg.url);
+    sendResponse({ result });
+  }
+
+  if (msg.action === "analyze_text") {
+    const result = await detectText(msg.text);
+    sendResponse({ result });
+  }
+
+  return true; // async
+});
