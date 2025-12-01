@@ -7,15 +7,29 @@
 </head>
 
 <body>
+
     <h1>Chimera</h1>
+
     <p id="result">Scan a URL or the current page for phishing threats.</p>
+
     <div class="card">
         <button id="scanCurrent">Scan Current Page</button>
     </div>
+
     <div class="card">
         <input type="text" id="urlInput" placeholder="Enter URL to scan…">
         <button id="scanURL">Scan URL</button>
     </div>
+
+    <div class="section">
+        <h3>Email Text Scanner</h3>
+        <textarea id="emailInput" placeholder="Paste suspicious email text here..."></textarea>
+        <button id="scanEmailBtn">Scan Email</button>
+
+        <div id="emailResult"></div>
+    </div>
+
+
 </body>
 
 <!-- JS -->
