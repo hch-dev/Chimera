@@ -1,5 +1,6 @@
 # dataset_loader.py
-from datasets import load_dataset
+import re
+from datasets import load_dataset, Dataset
 from torch.utils.data import TensorDataset
 import torch
 from transformers import AutoTokenizer
@@ -12,6 +13,15 @@ def find_text_column(ds, candidates):
             return c
     return None
 
+def extract_urls_from_text(text):
+    """
+    Extracts http/https URLs from a block of text.
+    """
+    if not isinstance(text, str): return []
+    # Basic regex to find URLs
+    urls = re.findall(r'(https?://[^\s<>"]+|www\.[^\s<>"]+)', text)
+    return [u.rstrip('.,;)') for u in urls] # Clean trailing punctuation
+
 def load_and_tokenize(cfg: GeneratorConfig, tcfg: TrainingConfig):
     log(f"Loading dataset: {tcfg.dataset_name}")
     ds = load_dataset(tcfg.dataset_name, split="train")
@@ -19,34 +29,44 @@ def load_and_tokenize(cfg: GeneratorConfig, tcfg: TrainingConfig):
     original_count = len(ds)
     filtered = False
 
-    # 1. Filter for Phishing Type
-    if "type" in ds.column_names:
-        ds = ds.filter(lambda x: x["type"] == "phishing")
+    # --- FILTER FOR PHISHING EMAILS FIRST ---
+    # Dataset uses 'labels' column: 0=Safe, 1=Phishing, 2=... 3=...
+    # We typically assume 1, 2, 3 are suspicious/phishing in this dataset.
+    if "labels" in ds.column_names:
+        log(f"Detected 'labels' column. Filtering for Phishing (label > 0)...")
+        ds = ds.filter(lambda x: x["labels"] > 0)
         filtered = True
     elif "label" in ds.column_names:
         ds = ds.filter(lambda x: x["label"] == 1)
         filtered = True
 
-    # 2. Filter for URLs (Remove Emails/Sentences)
-    # Heuristic: URLs rarely have spaces. Emails always do.
-    text_col = find_text_column(ds, tcfg.text_column_candidates)
-    if text_col:
-        log("Filtering for URLs (removing text with spaces)...")
-        before_url_filter = len(ds)
-
-        ds = ds.filter(lambda x: isinstance(x[text_col], str) and " " not in x[text_col].strip())
-
-        log(f"Removed {before_url_filter - len(ds)} non-URL items.")
-
     if filtered:
-        log(f"Dataset Ready: {len(ds)} Phishing URLs (Filtered out {original_count - len(ds)} items)")
-    else:
-        log("[WARN] No label column found. Training on MIXED data.")
+        log(f"Found {len(ds)} Phishing Emails. Now extracting URLs...")
 
-    # 3. Tokenization
-    if text_col is None:
-        raise ValueError(f"No text column found. Columns: {ds.column_names}")
+    # --- EXTRACT URLs FROM EMAILS ---
+    text_col = find_text_column(ds, tcfg.text_column_candidates)
+    if not text_col:
+        raise ValueError(f"No text column found. Available: {ds.column_names}")
 
+    # Extract all URLs into a list
+    extracted_urls = []
+    for row in ds:
+        content = row[text_col]
+        urls = extract_urls_from_text(content)
+        extracted_urls.extend(urls)
+
+    # Create a new dataset purely of URLs
+    # Limit to 20k to prevent memory overflow if millions are found
+    if len(extracted_urls) > 50000:
+        extracted_urls = extracted_urls[:50000]
+
+    log(f"Extracted {len(extracted_urls)} unique phishing URLs from emails.")
+
+    # If no URLs found, fallback (safety check)
+    if len(extracted_urls) == 0:
+        raise ValueError("No URLs could be extracted from the phishing emails! Dataset might be clean.")
+
+    # --- TOKENIZATION ---
     log(f"Loading tokenizer: {cfg.model_name}")
     tokenizer = AutoTokenizer.from_pretrained(cfg.model_name)
 
@@ -54,18 +74,10 @@ def load_and_tokenize(cfg: GeneratorConfig, tcfg: TrainingConfig):
         tokenizer.add_special_tokens({'pad_token': '<pad>'})
         log("Added special <pad> token to tokenizer.")
 
-    def preprocess(examples):
-        urls = examples[text_col]
-        urls = [u if isinstance(u, str) else "" for u in urls]
-        enc = tokenizer(urls,
-                        truncation=True,
-                        padding="max_length",
-                        max_length=cfg.max_length)
-        return enc
+    # Tokenize the list of strings directly
+    encodings = tokenizer(extracted_urls, truncation=True, padding="max_length", max_length=cfg.max_length)
 
-    log(f"Tokenizing {len(ds)} examples...")
-    tokenized = ds.map(preprocess, batched=True, remove_columns=ds.column_names)
-    input_ids = torch.tensor(tokenized["input_ids"], dtype=torch.long)
-    attention_mask = torch.tensor(tokenized["attention_mask"], dtype=torch.long)
+    input_ids = torch.tensor(encodings["input_ids"], dtype=torch.long)
+    attention_mask = torch.tensor(encodings["attention_mask"], dtype=torch.long)
 
     return TensorDataset(input_ids, attention_mask), tokenizer

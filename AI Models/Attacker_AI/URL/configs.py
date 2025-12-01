@@ -14,14 +14,14 @@ class GeneratorConfig:
 @dataclass
 class TrainingConfig:
     # --- DATASET SETTINGS ---
-    dataset_name: str = "renemel/compiled-phishing-dataset"
+    dataset_name: str = "cybersectony/PhishingEmailDetectionv2.0"
 
-    # renemel uses 'text' column
-    text_column_candidates: tuple = ("text", "url", "URL", "content")
+    # We will extract URLs from the email body column ('content' or 'text')
+    text_column_candidates: tuple = ("content", "text", "body", "email")
 
     # --- TRAINING SETTINGS ---
     batch_size: int = 4   # Keep low for CPU safety
-    num_epochs: int = 3   # 3 Epochs is good for fine-tuning
+    num_epochs: int = 3   # 3 Epochs
     lr: float = 2e-5      # Low Learning Rate
 
     save_dir: str = "models_url"

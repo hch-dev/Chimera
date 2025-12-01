@@ -18,7 +18,6 @@ def load_tokenizer():
 def generate_samples(model, tokenizer, device, max_new_tokens=64, temperature=0.8):
     model.eval()
 
-    # Prompt for URL generation
     start_text = "http"
     input_ids = tokenizer.encode(start_text, return_tensors='pt').to(device)
 
@@ -37,7 +36,6 @@ def generate_samples(model, tokenizer, device, max_new_tokens=64, temperature=0.
 
 def main():
     parser = argparse.ArgumentParser()
-    # Smart default checking
     default_ckpt = "models_url/generator_final.pt"
     if os.path.exists("models_url/generator_interrupted.pt"):
         default_ckpt = "models_url/generator_interrupted.pt"
@@ -50,8 +48,6 @@ def main():
     tokenizer = load_tokenizer()
     gcfg = GeneratorConfig()
     model = GeneratorModel(max_length=gcfg.max_length)
-
-    # Critical: Resize for new token
     model.gpt.resize_token_embeddings(len(tokenizer))
 
     if os.path.exists(args.ckpt):
