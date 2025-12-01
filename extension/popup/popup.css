@@ -1,0 +1,182 @@
+/*
+ * =======================================================
+ * LIGHT MODE (Default styles)
+ * =======================================================
+ */
+
+body {
+    margin: 0;
+    padding: 20px;
+    width: 280px;
+    font-family: "Inter", "Segoe UI", sans-serif;
+    /* Clean white background for Light Mode */
+    background: linear-gradient(135deg, #f0f0f5, #e0e0e0);
+    color: #1a1a1a; /* Dark text */
+    text-align: center;
+    border-radius: 12px;
+    transition: background 0.3s, color 0.3s;
+}
+
+h1 {
+    font-size: 20px;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+/* Subtext / Result Area */
+#result {
+    background: rgba(0, 0, 0, 0.05); /* Very light background for contrast */
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 14px;
+    margin-bottom: 16px;
+    font-weight: 400;
+    color: #333;
+}
+
+/* Buttons */
+button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    font-size: 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.15s ease;
+    color: white;
+    /* Vibrant gradient for Light Mode */
+    background: linear-gradient(135deg, #0f7ad1, #2abfa8);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+}
+
+button:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+button:active {
+    transform: translateY(1px);
+}
+
+/* Container Cards (Optional if needed) */
+.card {
+    background: #ffffff; /* White card */
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+input[type="text"] {
+    width: 90%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    outline: none;
+    background: #ffffff;
+    color: #1a1a1a;
+}
+
+input::placeholder {
+    color: #999;
+}
+
+
+/*
+ * =======================================================
+ * DARK MODE (Active when body has the .dark-theme class)
+ * =======================================================
+ */
+
+body.dark-theme {
+    /* Your original dark gradient background */
+    background: rgba(0, 0, 0, 1);
+    color: white; /* White text for contrast */
+}
+
+body.dark-theme #result {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(6px);
+    color: white;
+}
+
+body.dark-theme .card {
+    background: rgba(255, 255, 255, 0.1); /* Slightly transparent dark card */
+    backdrop-filter: blur(6px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+body.dark-theme input[type="text"] {
+    background: rgba(255, 255, 255, 0.25);
+    border: none;
+    color: white;
+}
+
+body.dark-theme input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* Custom CSS for the toggle switch for better look */
+.toggle-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0 10px;
+    margin-bottom: 10px;
+}
+.toggle-label {
+    font-size: 15px;
+    font-weight: 500;
+}
+/* Basic Toggle Switch Styles */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 45px;
+    height: 25px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #2abfa8; /* Button's primary color */
+}
+
+input:focus + .slider {
+    box-shadow: 0 0 1px #2abfa8;
+}
+
+input:checked + .slider:before {
+    transform: translateX(19px);
+}

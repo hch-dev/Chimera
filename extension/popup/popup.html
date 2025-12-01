@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Chimera – Phishing Scanner</title>
+    <link rel="stylesheet" href="popup.css">
+    <style>
+        /* Inline styles for quick layout; adjust in CSS file as needed */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 10px;
+        }
+        #header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        #theme-toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.7em;
+            color: #666;
+        }
+        #extension-ui {
+            margin-top: 10px;
+        }
+        .section {
+            margin-bottom: 15px;
+        }
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.85em;
+            margin-top: 5px;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 5px;
+            margin-top: 5px;
+            font-size: 0.9em;
+        }
+        button {
+            margin-top: 5px;
+            padding: 5px 10px;
+            font-size: 0.9em;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 36px;
+            height: 18px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 18px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+        input:checked + .slider:before {
+            transform: translateX(18px);
+        }
+        .result-box {
+            margin-top: 5px;
+            font-size: 0.85em;
+            color: #222;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="header-container">
+        <h3>Chimera</h3>
+        <div id="theme-toggle-container" title="Toggle Dark/Light Mode">
+            <label class="switch">
+                <input type="checkbox" id="themeToggle">
+                <span class="slider"></span>
+            </label>
+            <span id="themeStatusText">Light</span>
+        </div>
+    </div>
+
+    <section class="settings-section">
+        <input type="checkbox" id="statusToggle" checked>
+        <label for="statusToggle">Enable Extension</label>
+    </section>
+
+    <div id="extension-ui">
+        <section id="url-scan" class="section">
+            <div class="toggle-container">
+                <span>URL Scan Mode</span>
+                <label class="switch">
+                    <input type="checkbox" id="urlModeToggle">
+                    <span class="slider"></span>
+                </label>
+                <small id="urlModeText">Active</small>
+            </div>
+            <div id="urlActiveUI" style="margin-top: 5px;">
+                <input type="text" id="activeUrlInput" placeholder="Enter URL for active scan...">
+                <button id="scanActiveUrlBtn">Scan URL</button>
+                <div id="urlActiveResult" class="result-box"></div>
+            </div>
+            
+        </section>
+
+        <section id="email-scan" class="section">
+            <div class="toggle-container">
+                <span>Email Scan Mode</span>
+                <label class="switch">
+                    <input type="checkbox" id="emailModeToggle">
+                    <span class="slider"></span>
+                </label>
+                <small id="emailModeText">Active</small>
+            </div>
+            <div id="emailActiveUI" style="margin-top: 5px;">
+                <textarea id="emailActiveInput" placeholder="Paste email text for Active analysis..." rows="5"></textarea>
+                <button id="scanEmailActiveBtn">Analyze Email (Active)</button>
+                <div id="emailActiveResult" class="result-box"></div>
+            </div>
+        </section>
+    </div>
+    <hr color="#FF0000">
+
+    <div id="notificationArea" style="color:red; font-size:0.9em; margin-top:5px;"></div>
+
+    <script src="popup.js" type="module"></script>
+</body>
+</html>
