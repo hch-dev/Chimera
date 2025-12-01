@@ -1,1 +1,5 @@
-// Unified messaging API (optional left empty for now)
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+    if (msg.action === "scanSelection") {
+        analyzeSelectedText(msg.text);
+    }
+});
