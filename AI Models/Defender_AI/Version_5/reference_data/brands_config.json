@@ -1,0 +1,14 @@
+{
+  "logos/paypal.png": {
+    "name": "PayPal",
+    "safe_domains": ["paypal.com", "paypal.me"]
+  },
+  "logos/microsoft.png": {
+    "name": "Microsoft",
+    "safe_domains": ["microsoft.com", "live.com", "office.com"]
+  },
+  "logos/google.png": {
+    "name": "Google",
+    "safe_domains": ["google.com", "gmail.com", "accounts.google.com"]
+  }
+}

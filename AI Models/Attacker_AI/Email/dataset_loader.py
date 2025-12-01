@@ -1,4 +1,4 @@
-# dataset_loader.py
+# Email/dataset_loader.py
 from datasets import load_dataset
 from torch.utils.data import TensorDataset
 import torch
@@ -16,37 +16,51 @@ def load_and_tokenize(cfg: GeneratorConfig, tcfg: TrainingConfig):
     log(f"Loading dataset: {tcfg.dataset_name}")
     ds = load_dataset(tcfg.dataset_name, split="train")
 
-    # --- PHISHING FILTER LOGIC ---
-    # Mitake/PhishingURLsANDBenignURLs has a 'label' column.
-    # 1 = Phishing, 0 = Benign. We want ONLY Phishing (1).
-    if "label" in ds.column_names:
-        original_count = len(ds)
-        log(f"Filtering dataset for Phishing URLs (label=1)...")
+    original_count = len(ds)
+    filtered = False
+
+    # 1. Filter for Phishing Type
+    if "type" in ds.column_names:
+        ds = ds.filter(lambda x: x["type"] == "phishing")
+        filtered = True
+    elif "Email Type" in ds.column_names:
+        ds = ds.filter(lambda x: x["Email Type"] == "Phishing Email")
+        filtered = True
+    elif "label" in ds.column_names:
         ds = ds.filter(lambda x: x["label"] == 1)
+        filtered = True
 
-        new_count = len(ds)
-        log(f"Dataset filtered. Keeping {new_count} Phishing URLs (Dropped {original_count - new_count} safe URLs)")
-    else:
-        log("[WARN] 'label' column not found! Training on MIXED data.")
-    # -----------------------------
-
+    # 2. Filter for "Real Emails" (Must have spaces)
+    # This removes raw URLs (which usually have no spaces) so the AI learns to write text.
     text_col = find_text_column(ds, tcfg.text_column_candidates)
-    if text_col is None:
-        raise ValueError(f"No URL column found. Columns: {ds.column_names}")
+    if text_col:
+        log("Filtering out raw URLs (Keeping only text with spaces)...")
+        before_url_filter = len(ds)
 
-    log(f"Using URL column: {text_col}")
+        # Keep only if it has at least 2 spaces (implies a sentence)
+        ds = ds.filter(lambda x: isinstance(x[text_col], str) and x[text_col].strip().count(' ') > 2)
+
+        log(f"Removed {before_url_filter - len(ds)} raw URLs/short texts.")
+
+    if filtered:
+        log(f"Final Dataset: {len(ds)} Phishing Emails ready for training.")
+    else:
+        log("[WARN] No label column found. Training on MIXED data.")
+
+    # 3. Tokenization (Standard)
+    if text_col is None:
+        raise ValueError(f"No text column found. Columns: {ds.column_names}")
 
     log(f"Loading tokenizer: {cfg.model_name}")
     tokenizer = AutoTokenizer.from_pretrained(cfg.model_name)
 
     if tokenizer.pad_token is None:
         tokenizer.add_special_tokens({'pad_token': '<pad>'})
-        log("Added special <pad> token to tokenizer.")
 
     def preprocess(examples):
-        urls = examples[text_col]
-        urls = [u if isinstance(u, str) else "" for u in urls]
-        enc = tokenizer(urls,
+        texts = examples[text_col]
+        texts = [t if isinstance(t, str) else "" for t in texts]
+        enc = tokenizer(texts,
                         truncation=True,
                         padding="max_length",
                         max_length=cfg.max_length)

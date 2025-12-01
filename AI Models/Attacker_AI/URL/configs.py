@@ -3,24 +3,30 @@ from dataclasses import dataclass
 
 @dataclass
 class GeneratorConfig:
-    # Changed from GeneratorURLConfig to match generator_inference.py
     model_name: str = "gpt2"
-    max_length: int = 64
+    max_length: int = 64           # URLs are short
     d_model: int = 256
     nhead: int = 4
     num_layers: int = 2
     dropout: float = 0.1
-    device: str = "cpu"  # Change to "cuda" if you have a GPU
+    device: str = "cpu"
 
 @dataclass
 class TrainingConfig:
-    # Changed from TrainingURLConfig to match train_gan.py
-    dataset_name: str = "Mitake/PhishingURLsANDBenignURLs"
-    text_column_candidates: tuple = ("url", "URL", "Url")
-    label_column_candidates: tuple = ("label", "Label")
-    batch_size: int = 32
-    num_epochs: int = 1
-    lr: float = 3e-4
+    # --- DATASET SETTINGS ---
+    dataset_name: str = "renemel/compiled-phishing-dataset"
+
+    # renemel uses 'text' column
+    text_column_candidates: tuple = ("text", "url", "URL", "content")
+
+    # --- TRAINING SETTINGS ---
+    batch_size: int = 4   # Keep low for CPU safety
+    num_epochs: int = 3   # 3 Epochs is good for fine-tuning
+    lr: float = 2e-5      # Low Learning Rate
+
     save_dir: str = "models_url"
     save_every: int = 1
     seed: int = 42
+
+    # --- RESUME CAPABILITY ---
+    resume_checkpoint: str = "models_url/generator_final.pt"

@@ -21,8 +21,8 @@ env/
 *.bin
 
 # Specific Model Directories
-saved_models/
-ai_engines/saved_models/
+AI Models/Attacker_AI/Email/models_email
+AI Models/Attacker_AI/URL/models_url
 
 # --- Datasets ---
 # Don't upload raw data (privacy & size issues)
@@ -48,3 +48,7 @@ Thumbs.db
 # --- Logs & Temporary Files ---
 *.log
 tmp/
+venv/
+*.pt
+*.safetensors
+AI Models/Defender_AI/Version_3/results/

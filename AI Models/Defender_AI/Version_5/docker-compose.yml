@@ -1,0 +1,12 @@
+
+
+services:
+  chrome-sandbox:
+    image: selenium/standalone-chrome:latest
+    container_name: defender_v5_sandbox
+    ports:
+      - "4444:4444"  # Exposes the browser control port to Python
+    shm_size: '2gb'  # Crucial: Prevents browser crashes on heavy sites
+    volumes:
+      - /dev/shm:/dev/shm
+    restart: always

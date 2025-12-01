@@ -22,7 +22,7 @@ def main():
     device = torch.device(gcfg.device if torch.cuda.is_available() else "cpu")
     log(f"Using device: {device}")
 
-    # 1. Load Data
+    # 1. Load Dataset
     dataset, tokenizer = load_and_tokenize(gcfg, tcfg)
     dataloader = DataLoader(dataset, batch_size=tcfg.batch_size, shuffle=True, collate_fn=collate_batch)
 
@@ -41,13 +41,11 @@ def main():
     start_epoch = 1
     steps_to_skip = 0
 
-    interrupted_path = os.path.join(tcfg.save_dir, "generator_interrupted.pt")
-    final_path = os.path.join(tcfg.save_dir, "generator_final.pt")
+    interrupted_ckpt = os.path.join(tcfg.save_dir, "generator_interrupted.pt")
 
-    # Priority 1: Interrupted
-    if os.path.exists(interrupted_path):
-        log(f"⚠️  Found interrupted session! Resuming from: {interrupted_path}")
-        ckpt = torch.load(interrupted_path, map_location="cpu")
+    if os.path.exists(interrupted_ckpt):
+        log(f"⚠️  Found interrupted session! Resuming from: {interrupted_ckpt}")
+        ckpt = torch.load(interrupted_ckpt, map_location="cpu")
         model.load_state_dict(ckpt['model_state_dict'])
         optimizer.load_state_dict(ckpt['optimizer_state_dict'])
         start_epoch = ckpt['epoch']
@@ -55,7 +53,6 @@ def main():
         model.to(device)
         log(f"⏩ Fast-forwarding: Skipping first {steps_to_skip} batches...")
 
-    # Priority 2: Previous Final Model
     elif tcfg.resume_checkpoint and os.path.exists(tcfg.resume_checkpoint):
         log(f"♻️  Resuming training from: {tcfg.resume_checkpoint}")
         ckpt = torch.load(tcfg.resume_checkpoint, map_location="cpu")
@@ -64,19 +61,15 @@ def main():
         model.to(device)
         log("✅ Previous knowledge loaded.")
     else:
-        log("🆕 Starting training from scratch...")
+        log("🆕 Starting training from scratch (Fine-Tuning)...")
         model.to(device)
 
-    # --- AUTO-SAVE CONFIG ---
-    # Save every 3000 URLs.
-    # If batch_size=4, then 3000 URLs = 750 Batches.
-    save_interval_steps = 3000 // tcfg.batch_size
+    # Auto-Save every 2000 emails (500 batches)
+    save_interval_steps = 2000 // tcfg.batch_size
     if save_interval_steps < 1: save_interval_steps = 1
-    log(f"Auto-save enabled: Saving every {save_interval_steps} batches.")
 
     model.train()
 
-    # 4. ROBUST TRAINING LOOP
     try:
         for epoch in range(start_epoch, tcfg.num_epochs + 1):
             total_loss = 0.0
@@ -86,9 +79,8 @@ def main():
                 steps_to_skip = 0
 
             for i, (input_ids, attn) in enumerate(dataloader):
-                # SKIP LOGIC
                 if i < steps_to_skip:
-                    if i % 1000 == 0: print(f"⏩ Skipping batch {i}...", end='\r')
+                    if i % 500 == 0: print(f"⏩ Skipping batch {i}...", end='\r')
                     continue
 
                 input_ids = input_ids.to(device)
@@ -110,7 +102,6 @@ def main():
                 if i % 50 == 0:
                     print(f"   Epoch {epoch} | Batch {i}/{len(dataloader)} | Loss: {loss.item():.4f}", end='\r')
 
-                # AUTO-SAVE (Every 3000 URLs)
                 if (i + 1) % save_interval_steps == 0:
                     state = {
                         'epoch': epoch,
@@ -118,18 +109,19 @@ def main():
                         'model_state_dict': model.state_dict(),
                         'optimizer_state_dict': optimizer.state_dict()
                     }
-                    torch.save(state, interrupted_path)
-                    print(f"\n💾 [AUTO-SAVE] Progress saved at {i} batches.")
+                    torch.save(state, interrupted_ckpt)
+                    print(f"\n💾 [AUTO-SAVE] Progress saved at batch {i}.")
 
             avg_loss = total_loss / max(1, steps)
             log(f"\n[EPOCH {epoch}/{tcfg.num_epochs}] avg_loss={avg_loss:.4f}")
 
-            torch.save(model.state_dict(), final_path)
+            save_path = os.path.join(tcfg.save_dir, "generator_final.pt")
+            torch.save(model.state_dict(), save_path)
 
-            if os.path.exists(interrupted_path):
-                os.remove(interrupted_path)
+            if os.path.exists(interrupted_ckpt):
+                os.remove(interrupted_ckpt)
 
-        log(f"Training complete. Final model saved to: {final_path}")
+        log(f"Training complete. Final model saved to: {save_path}")
 
     except KeyboardInterrupt:
         print("\n\n🛑 FORCE STOP DETECTED! Saving state...")
@@ -139,8 +131,8 @@ def main():
             'model_state_dict': model.state_dict(),
             'optimizer_state_dict': optimizer.state_dict()
         }
-        torch.save(state, interrupted_path)
-        print(f"✅ Progress saved to: {interrupted_path}")
+        torch.save(state, interrupted_ckpt)
+        print(f"✅ Progress saved to: {interrupted_ckpt}")
         sys.exit(0)
 
 if __name__ == "__main__":
