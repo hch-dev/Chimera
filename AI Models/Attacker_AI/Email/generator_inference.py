@@ -10,8 +10,7 @@ def load_tokenizer():
     print("[LOG] Using GPT-2 tokenizer")
     tokenizer = AutoTokenizer.from_pretrained("gpt2", use_fast=True)
 
-    # CRITICAL FIX: Match the training script exactly
-    # Training added a <pad> token, so we must too.
+    # MATCH TRAINING LOGIC: Add PAD token
     if tokenizer.pad_token is None:
         tokenizer.add_special_tokens({'pad_token': '<pad>'})
 
@@ -21,10 +20,10 @@ def load_tokenizer():
 def generate_samples(model, tokenizer, device, max_new_tokens=64, temperature=0.8):
     model.eval()
 
-    start_text = "Subject:"
+    start_text = "http"
     input_ids = tokenizer.encode(start_text, return_tensors='pt').to(device)
 
-    # Use HuggingFace's built-in generate
+    # Use HuggingFace's generate
     output_ids = model.gpt.generate(
         input_ids,
         max_new_tokens=max_new_tokens,
@@ -40,7 +39,8 @@ def generate_samples(model, tokenizer, device, max_new_tokens=64, temperature=0.
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--ckpt", type=str, default="models/generator_final.pt")
+    # Default to the correct folder (models_url)
+    parser.add_argument("--ckpt", type=str, default="models_url/generator_final.pt")
     args = parser.parse_args()
 
     device = torch.device("cpu")
@@ -52,26 +52,26 @@ def main():
     gcfg = GeneratorConfig()
     model = GeneratorModel(max_length=gcfg.max_length)
 
-    # 3. CRITICAL FIX: Resize before loading weights
-    # The saved weights have 50258 params. The new model has 50257.
-    # We must resize to 50258 BEFORE loading.
+    # 3. Resize embeddings to match training (CRITICAL FIX)
     model.gpt.resize_token_embeddings(len(tokenizer))
 
-    # 4. Load Fine-Tuned Weights
+    # 4. Load Weights
     if os.path.exists(args.ckpt):
         print(f"[LOG] Loading fine-tuned weights from {args.ckpt}...")
         checkpoint = torch.load(args.ckpt, map_location=device)
-        model.load_state_dict(checkpoint, strict=False)
+
+        # Handle different save formats (state_dict vs full checkpoint)
+        state = checkpoint['model_state_dict'] if 'model_state_dict' in checkpoint else checkpoint
+        model.load_state_dict(state)
     else:
-        print(f"[WARN] No checkpoint found at {args.ckpt}. Please train first.")
-        return
+        print(f"[WARN] No checkpoint found at {args.ckpt}. Using raw GPT-2.")
 
     model.to(device)
 
-    print("\n=== GENERATED PHISHING EMAILS (GPT-2 FINE-TUNED) ===")
-    for i in range(5):
-        email = generate_samples(model, tokenizer, device)
-        print(f"\n--- Email {i+1} ---\n{email}\n")
+    print("\n=== GENERATED PHISHING URLs ===")
+    for i in range(10):
+        url = generate_samples(model, tokenizer, device)
+        print(f"{i+1}. {url}")
 
 if __name__ == "__main__":
     main()

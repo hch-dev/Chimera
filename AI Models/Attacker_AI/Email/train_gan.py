@@ -31,55 +31,48 @@ def main():
     new_vocab_size = len(tokenizer)
     model.gpt.resize_token_embeddings(new_vocab_size)
 
-    # Setup Optimizer & Loss
+    # Setup Optimizer
     optimizer = torch.optim.AdamW(model.parameters(), lr=tcfg.lr)
     criterion = nn.CrossEntropyLoss(ignore_index=tokenizer.pad_token_id)
 
     ensure_dir(tcfg.save_dir)
 
-    # --- 3. SMART RESUME LOGIC ---
+    # --- SMART RESUME LOGIC ---
     start_epoch = 1
     steps_to_skip = 0
 
-    # File paths
     interrupted_path = os.path.join(tcfg.save_dir, "generator_interrupted.pt")
     final_path = os.path.join(tcfg.save_dir, "generator_final.pt")
 
-    # Priority 1: Check for an interrupted session (Force Stopped)
+    # Priority 1: Interrupted
     if os.path.exists(interrupted_path):
         log(f"⚠️  Found interrupted session! Resuming from: {interrupted_path}")
         ckpt = torch.load(interrupted_path, map_location="cpu")
-
         model.load_state_dict(ckpt['model_state_dict'])
         optimizer.load_state_dict(ckpt['optimizer_state_dict'])
         start_epoch = ckpt['epoch']
         steps_to_skip = ckpt['steps_finished']
-
         model.to(device)
-        log(f"⏩ Fast-forwarding to Epoch {start_epoch}, Batch {steps_to_skip}...")
+        log(f"⏩ Fast-forwarding: Skipping first {steps_to_skip} batches...")
 
-    # Priority 2: Check for a finished model (Incremental Learning)
+    # Priority 2: Previous Final Model
     elif tcfg.resume_checkpoint and os.path.exists(tcfg.resume_checkpoint):
-        log(f"♻️  Resuming from previous best model: {tcfg.resume_checkpoint}")
-        checkpoint = torch.load(tcfg.resume_checkpoint, map_location="cpu")
-
-        # Handle different save formats
-        state = checkpoint['model_state_dict'] if 'model_state_dict' in checkpoint else checkpoint
+        log(f"♻️  Resuming training from: {tcfg.resume_checkpoint}")
+        ckpt = torch.load(tcfg.resume_checkpoint, map_location="cpu")
+        state = ckpt['model_state_dict'] if 'model_state_dict' in ckpt else ckpt
         model.load_state_dict(state)
         model.to(device)
-        log("✅ Previous knowledge loaded! Improving current model.")
-
+        log("✅ Previous knowledge loaded.")
     else:
         log("🆕 Starting training from scratch...")
         model.to(device)
 
-    # --- CONFIG FOR AUTO-SAVE ---
-    # Calculate how many steps equal 2000 emails
-    # Example: 2000 emails / Batch Size 4 = 500 Steps
-    save_interval_steps = 2000 // tcfg.batch_size
+    # --- AUTO-SAVE CONFIG ---
+    # Save every 3000 URLs.
+    # If batch_size=4, then 3000 URLs = 750 Batches.
+    save_interval_steps = 3000 // tcfg.batch_size
     if save_interval_steps < 1: save_interval_steps = 1
-
-    log(f"Auto-save enabled: Saving every {save_interval_steps} batches ({save_interval_steps * tcfg.batch_size} emails).")
+    log(f"Auto-save enabled: Saving every {save_interval_steps} batches.")
 
     model.train()
 
@@ -89,16 +82,14 @@ def main():
             total_loss = 0.0
             steps = 0
 
-            # If we started a NEW epoch, reset the skip counter
             if epoch > start_epoch:
                 steps_to_skip = 0
 
             for i, (input_ids, attn) in enumerate(dataloader):
-                # --- SKIP LOGIC (Fast Forward) ---
+                # SKIP LOGIC
                 if i < steps_to_skip:
-                    if i % 100 == 0: print(f"⏩ Skipping batch {i}/{len(dataloader)}...", end='\r')
+                    if i % 1000 == 0: print(f"⏩ Skipping batch {i}...", end='\r')
                     continue
-                # ---------------------------------
 
                 input_ids = input_ids.to(device)
                 attn = attn.to(device)
@@ -116,13 +107,11 @@ def main():
                 total_loss += loss.item()
                 steps += 1
 
-                # Progress Log
                 if i % 50 == 0:
                     print(f"   Epoch {epoch} | Batch {i}/{len(dataloader)} | Loss: {loss.item():.4f}", end='\r')
 
-                # --- AUTO-SAVE (Every 2000 Emails) ---
+                # AUTO-SAVE (Every 3000 URLs)
                 if (i + 1) % save_interval_steps == 0:
-                    # We save to the 'interrupted' file so if it crashes now, we resume from here
                     state = {
                         'epoch': epoch,
                         'steps_finished': i + 1,
@@ -130,17 +119,13 @@ def main():
                         'optimizer_state_dict': optimizer.state_dict()
                     }
                     torch.save(state, interrupted_path)
-                    # Print a new line so we don't overwrite the progress bar
-                    print(f"\n💾 [AUTO-SAVE] Progress saved at {i} batches ({i * tcfg.batch_size} emails).")
-                # -------------------------------------
+                    print(f"\n💾 [AUTO-SAVE] Progress saved at {i} batches.")
 
             avg_loss = total_loss / max(1, steps)
             log(f"\n[EPOCH {epoch}/{tcfg.num_epochs}] avg_loss={avg_loss:.4f}")
 
-            # Save regular checkpoint at end of epoch
             torch.save(model.state_dict(), final_path)
 
-            # Since we finished the epoch safely, we can delete the resume file
             if os.path.exists(interrupted_path):
                 os.remove(interrupted_path)
 
@@ -148,16 +133,14 @@ def main():
 
     except KeyboardInterrupt:
         print("\n\n🛑 FORCE STOP DETECTED! Saving state...")
-
         state = {
             'epoch': epoch,
-            'steps_finished': i, # Save exactly where we stopped
+            'steps_finished': i,
             'model_state_dict': model.state_dict(),
             'optimizer_state_dict': optimizer.state_dict()
         }
         torch.save(state, interrupted_path)
         print(f"✅ Progress saved to: {interrupted_path}")
-        print(f"   Next time you run this script, it will auto-resume from Epoch {epoch}, Batch {i}.")
         sys.exit(0)
 
 if __name__ == "__main__":

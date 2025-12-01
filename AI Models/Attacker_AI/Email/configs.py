@@ -13,20 +13,17 @@ class GeneratorConfig:
 
 @dataclass
 class TrainingConfig:
-    # --- DATASET SETTINGS ---
-    # Change this to your NEW dataset when you are ready
-    dataset_name: str = "renemel/compiled-phishing-dataset"
-    text_column_candidates: list = ("text", "Email Text", "email_text")
+    dataset_name: str = "Mitake/PhishingURLsANDBenignURLs"
+    text_column_candidates: tuple = ("url", "URL", "Url")
 
-    # --- TRAINING SETTINGS ---
-    batch_size: int = 4
+    # --- CRITICAL SETTINGS ---
+    batch_size: int = 4  # Small batch size to prevent RAM crashes
     num_epochs: int = 3
-    lr: float = 2e-5    # LOWER learning rate to protect old knowledge
+    lr: float = 2e-5     # Low learning rate for fine-tuning
 
-    save_dir: str = "models"
+    save_dir: str = "models_url"
     save_every: int = 1
     seed: int = 42
 
-    # --- NEW: RESUME CAPABILITY ---
-    # Path to your "smart" model. Set to None to start fresh.
-    resume_checkpoint: str = "models/generator_final.pt"
+    # --- RESUME CAPABILITY ---
+    resume_checkpoint: str = "models_url/generator_final.pt"
