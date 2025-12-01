@@ -22,13 +22,17 @@
     }
   ],
 
+ {
   "permissions": [
-    "storage",
+    "contextMenus",
     "activeTab",
-    "scripting"
+    "storage",
+    "scripting",
+    "notifications"
   ],
-
   "host_permissions": [
     "<all_urls>"
-  ]
+  ],
+  ...
 }
+
