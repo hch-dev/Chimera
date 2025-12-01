@@ -14,3 +14,36 @@ chrome.runtime.onMessage.addListener(async (msg, sender, sendResponse) => {
 
   return true; // async
 });
+
+chrome.runtime.onInstalled.addListener(() => {
+    chrome.contextMenus.create({
+        id: "chimera-scan-selection",
+        title: "Scan selected text",
+        contexts: ["selection"]
+    });
+});
+
+chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+    if (info.menuItemId === "chimera-scan-selection") {
+        const selectedText = info.selectionText;
+
+        chrome.runtime.sendMessage({
+            action: "scanSelection",
+            text: selectedText
+        });
+    }
+});
+
+import { analyze } from "../api/detector.js";
+
+async function analyzeSelectedText(text) {
+    const result = await analyze({ type: "email", text });
+
+    chrome.notifications.create({
+        type: "basic",
+        iconUrl: "../icons/icon128.png",
+        title: "Chimera Scan Result",
+        message: `Verdict: ${result.verdict.toUpperCase()}`
+    });
+}
+
