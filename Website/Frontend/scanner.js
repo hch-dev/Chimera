@@ -1,4 +1,7 @@
-const API_URL = "http://127.0.0.1:5000/scan";
+// 1. Set your Ngrok URL here (Do not include /scan at the end)
+const SERVER_URL = "https://adelia-commonsense-soaked.ngrok-free.dev";
+// The endpoint we want to hit
+const API_URL = `${SERVER_URL}/scan`;
 
 document.addEventListener('DOMContentLoaded', () => {
     const sessionUrl = sessionStorage.getItem('scanUrl');

@@ -1,14 +1,14 @@
 // api/detector.js
 
 // Example placeholder: replace with your actual backend URL if different
-const API_URL = "http://0.0.0.0:5000";
+const API_URL = "https://adelia-commonsense-soaked.ngrok-free.dev";
 
 /**
  * Detects phishing in a specific URL
  */
 export async function detectURL(url) {
   try {
-    const res = await fetch(`${API_URL}/scan`, {
+    const res = await fetch(`${API_URL}/scan  `, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ url })
