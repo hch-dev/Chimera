@@ -84,11 +84,7 @@
         input:checked + .slider:before {
             transform: translateX(18px);
         }
-        .result-box {
-            margin-top: 5px;
-            font-size: 0.85em;
-            color: #222;
-        }
+       
     </style>
 </head>
 
@@ -123,7 +119,7 @@
             <div id="urlActiveUI" style="margin-top: 5px;">
                 <input type="text" id="activeUrlInput" placeholder="Enter URL for active scan...">
                 <button id="scanActiveUrlBtn">Scan URL</button>
-                <div id="urlActiveResult" class="result-box" style="color: #F5BD02"></div>
+                <div id="urlActiveResult" class="result-box"></div>
             </div>
             
         </section>
@@ -140,7 +136,7 @@
             <div id="emailActiveUI" style="margin-top: 5px;">
                 <textarea id="emailActiveInput" placeholder="Paste email text for Active analysis..." rows="5"></textarea>
                 <button id="scanEmailActiveBtn">Analyze Email (Active)</button>
-                <div id="emailActiveResult" class="result-box" style="color: #F5BD02"></div>
+                <div id="emailActiveResult" class="result-box"></div>
             </div>
         </section>
     </div>
@@ -151,4 +147,3 @@
     <script src="popup.js" type="module"></script>
 </body>
 </html>
-
