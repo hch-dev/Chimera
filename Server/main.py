@@ -8,15 +8,11 @@ from concurrent.futures import ThreadPoolExecutor
 # We need to navigate from: .../Chimera/Website/Backend/
 # To: ..................... .../Chimera/AI_Models/Defender_AI/Version_1/
 
-# Get the directory where this script is running (.../Backend)
+# Get the directory where this script is running (.../Chimera/Backend)
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
-# Go up two levels to reach the project root (.../Chimera)
-# Step 1: Go up to 'Website'
-website_dir = os.path.dirname(current_dir)
-# Step 2: Go up to 'Chimera'
-project_root = os.path.dirname(website_dir)
-
+# Go up ONE level to reach the project root (.../Chimera)
+project_root = os.path.dirname(current_dir)
 # Construct the path to the 'Version_1' folder where 'features' lives
 target_path = os.path.join(project_root, "AI Models", "Defender_AI", "Version_1")
 

@@ -1,7 +1,7 @@
 // api/detector.js
 
 // Example placeholder: replace with your actual backend URL if different
-const API_URL = "http://localhost:5000/detect";
+const API_URL = "http://0.0.0.0:5000";
 
 /**
  * Detects phishing in a specific URL

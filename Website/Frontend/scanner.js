@@ -1,4 +1,4 @@
-const API_URL = "http://127.0.0.1:8000/scan";
+const API_URL = "http://127.0.0.1:5000/scan";
 
 document.addEventListener('DOMContentLoaded', () => {
     const sessionUrl = sessionStorage.getItem('scanUrl');
