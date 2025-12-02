@@ -67,6 +67,12 @@ button:active {
     margin-bottom: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
+ .result-box {
+            margin-top: 5px;
+            font-size: 0.85em;
+            color: #000040;
+            font-weight: bold;
+        }
 
 input[type="text"] {
     width: 90%;
@@ -93,7 +99,7 @@ input::placeholder {
 
 body.dark-theme {
     /* Your original dark gradient background */
-    background: rgba(0, 0, 0, 1);
+    background: rgba(0, 0, 64, 1);
     color: white; /* White text for contrast */
 }
 
@@ -118,6 +124,13 @@ body.dark-theme input[type="text"] {
 body.dark-theme input::placeholder {
     color: rgba(255, 255, 255, 0.7);
 }
+
+body.dark-theme .result-box {
+            margin-top: 5px;
+            font-size: 0.85em;
+            color: #e6bd14;
+            font-weight: bold;
+        }
 
 /* Custom CSS for the toggle switch for better look */
 .toggle-container {
@@ -168,6 +181,7 @@ body.dark-theme input::placeholder {
     transition: 0.4s;
     border-radius: 50%;
 }
+
 
 input:checked + .slider {
     background-color: #2abfa8; /* Button's primary color */
