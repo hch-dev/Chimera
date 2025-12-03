@@ -1,5 +1,10 @@
 # configs.py
 from dataclasses import dataclass
+import torch
+
+# Automatically detect GPU → else CPU
+AUTO_DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+
 
 @dataclass
 class GeneratorConfig:
@@ -9,7 +14,8 @@ class GeneratorConfig:
     nhead: int = 4
     num_layers: int = 2
     dropout: float = 0.1
-    device: str = "cpu"
+    device: str = AUTO_DEVICE      # <--- updated
+
 
 @dataclass
 class TrainingConfig:

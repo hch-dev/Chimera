@@ -39,8 +39,8 @@ def main():
     parser = argparse.ArgumentParser()
     # Default to models_email folder
     default_ckpt = "models_email/generator_final.pt"
-    if os.path.exists("models_email/generator_interrupted.pt"):
-        default_ckpt = "models_email/generator_interrupted.pt"
+    if os.path.exists("models_email/generator_final.pt"):
+        default_ckpt = "models_email/generator_final.pt"
 
     parser.add_argument("--ckpt", type=str, default=default_ckpt)
     args = parser.parse_args()
