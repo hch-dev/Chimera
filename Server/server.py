@@ -59,7 +59,7 @@ def scan_url(request: ScanRequest):
         # It will try 'predict_url', 'analyze', or 'scan'.
         
         if hasattr(main, 'predict_url'):
-            result = main.predict_url(request.url)
+            result = main.run_feature(request.url)
         elif hasattr(main, 'analyze'):
             result = main.analyze(request.url)
         elif hasattr(main, 'scan'):
