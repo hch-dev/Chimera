@@ -1,5 +1,5 @@
 // 1. Set your Ngrok URL here (Do not include /scan at the end)
-const SERVER_URL = "https://adelia-commonsense-soaked.ngrok-free.dev";
+const SERVER_URL = "https://url-backend-yn04.onrender.com";
 // The endpoint we want to hit
 const API_URL = `${SERVER_URL}/scan`;
 
