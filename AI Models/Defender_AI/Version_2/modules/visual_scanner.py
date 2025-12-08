@@ -1,121 +1,77 @@
 import os
 import numpy as np
-from PIL import Image
-from log import LOG
-# Import relative path utility
-from utils.browser_ops import capture_screenshot, cleanup_screenshot, SCREENSHOT_PATH
+import tensorflow as pd
+from tensorflow.keras.models import load_model
+from tensorflow.keras.preprocessing.image import img_to_array, load_img
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+import time
 
-# MOCK PLACEHOLDERS for model and scaler files
-MODEL_PATH = "models/visual_net_v1.h5" 
-SCALER_PATH = "models/scaler_v1.pkl"
+# Settings matching your training
+IMG_SIZE = 128
 
 class VisualScanner:
-    """
-    Performs dynamic visual analysis using a Convolutional Neural Network (CNN) (New V2 Logic).
-    MOCK: The model loading and prediction are simulated.
-    """
-
     def __init__(self):
-        self.model = None
-        self.scaler = None
-        self.model_loaded = False # Initialize flag
-        LOG.info("VisualScanner (V2) initialized.")
-        self._load_model_and_scaler()
+        # 1. Load the trained model
+        # We look for the model in the 'models' folder relative to the project root
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        model_path = os.path.join(base_dir, 'models', 'visual_model.h5')
 
-    def _load_model_and_scaler(self):
-        """
-        MOCK: Simulates loading the trained CNN model and a feature scaler.
-        """
-        if not os.path.exists(MODEL_PATH):
-             # Ensure the 'models' directory exists before creating files
-             os.makedirs(os.path.dirname(MODEL_PATH), exist_ok=True)
-             
-             LOG.warning(f"MOCK: Model file not found at {MODEL_PATH}. Creating placeholder files.")
-             try:
-                 with open(MODEL_PATH, 'w') as f:
-                     f.write("CNN Model Placeholder")
-                 with open(SCALER_PATH, 'w') as f:
-                     f.write("Scaler Placeholder")
-             except Exception as e:
-                 LOG.error(f"Failed to create mock files: {e}")
-                 return # Exit if file creation fails
+        if not os.path.exists(model_path):
+            raise FileNotFoundError(f"Model not found at: {model_path}. Run train_model.py first!")
 
-        # MOCK: Set a flag to indicate 'model loaded' successfully
-        self.model_loaded = True
-        LOG.info("V2 Model and Scaler MOCK: Successfully initialized placeholder models.")
+        print(f"Loading Model: {model_path}")
+        self.model = load_model(model_path)
 
+    def capture_screenshot(self, url, save_path="temp_scan.png"):
+        """Captures a headless screenshot of the website."""
+        options = Options()
+        options.add_argument("--headless") # Run in background
+        options.add_argument("--window-size=1280,1024")
+        options.add_argument("--ignore-certificate-errors")
 
-    def _preprocess_image(self, image_path):
-        """
-        Preprocesses the screenshot image for CNN input.
-        """
-        if not os.path.exists(image_path):
-            LOG.error(f"Image not found at {image_path}")
-            return None
-
+        # Initialize WebDriver (Chrome)
+        driver = webdriver.Chrome(options=options)
         try:
-            img = Image.open(image_path).convert('RGB')
-            # Resize is critical for CNN input consistency
-            img = img.resize((128, 128)) 
-            # Normalize pixel values
-            img_array = np.array(img, dtype=np.float32) / 255.0
-            
-            # Add batch dimension: (1, 128, 128, 3)
-            return np.expand_dims(img_array, axis=0)
-
+            driver.get(url)
+            time.sleep(2) # Wait for render
+            driver.save_screenshot(save_path)
+            driver.quit()
+            return True
         except Exception as e:
-            LOG.error(f"Error preprocessing image: {e}")
-            return None
+            print(f"Screenshot Error: {e}")
+            driver.quit()
+            return False
 
     def get_visual_score(self, url):
         """
-        Captures the screenshot and runs the CNN prediction (MOCK).
-        Returns a score from 0 (Safe) to 100 (High Risk).
+        Returns a phishing score from 0 to 100.
+        Higher = More likely Phishing.
         """
-        if not self.model_loaded:
-            LOG.error("V2 Model not loaded. Returning fallback score.")
-            return 50 
+        temp_img = "temp_scan.png"
 
-        image_path = None
+        # 1. Capture Image
+        if not self.capture_screenshot(url, temp_img):
+            return 0 # Failed to capture, return safe (or handle as error)
+
         try:
-            # Step 1: Capture the visual state of the page
-            image_path = capture_screenshot(url)
-            if not image_path:
-                return 50 # Neutral fallback if capture fails
+            # 2. Preprocess for CNN (Resize -> Array -> Normalize)
+            img = load_img(temp_img, target_size=(IMG_SIZE, IMG_SIZE))
+            img_array = img_to_array(img)
+            img_array = np.expand_dims(img_array, axis=0) # Make batch of 1
+            img_array = img_array / 255.0 # Normalize pixel values
 
-            # Step 2: Preprocess the image
-            processed_image = self._preprocess_image(image_path)
-            if processed_image is None:
-                return 50 # Neutral fallback if preprocessing fails
+            # 3. Predict
+            prediction = self.model.predict(img_array)[0][0]
 
-            # Step 3: Run the CNN model prediction (MOCK)
-            LOG.info("MOCK: Running simulated CNN prediction...")
-            
-            # --- MOCK PREDICTION START ---
-            # Simulate a result based on keywords in the URL
-            lower_url = url.lower()
-            if 'phish' in lower_url or 'secure.login.verify' in lower_url:
-                # High risk simulation
-                risk_score = np.random.randint(90, 100)
-                LOG.warning(f"MOCK: Visual analysis detected high visual risk ({risk_score})")
-            elif 'google' in lower_url or 'microsoft' in lower_url or 'wikipedia' in lower_url:
-                # Low risk simulation for known legitimate sites
-                risk_score = np.random.randint(5, 40)
-            else:
-                # Medium/uncertain risk
-                risk_score = np.random.randint(40, 70) 
+            # Clean up
+            if os.path.exists(temp_img):
+                os.remove(temp_img)
 
-            # Ensure score is 0-100 and cast to int
-            visual_risk_score = int(np.clip(risk_score, 0, 100))
-            # --- MOCK PREDICTION END ---
-
-            LOG.info(f"V2 Visual CNN Score for '{url}': {visual_risk_score}/100")
-            return visual_risk_score
+            # 4. Return Score (0-100)
+            # Assuming '1' is Phishing (from your check_labels.py logic)
+            return float(prediction * 100)
 
         except Exception as e:
-            LOG.error(f"Critical error during V2 Visual scanning: {e}")
-            return 50 # Neutral fallback score
-
-        finally:
-            if image_path:
-                cleanup_screenshot(image_path)
+            print(f"Prediction Error: {e}")
+            return 0

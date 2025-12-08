@@ -1,14 +1,30 @@
 {
-  "logos/paypal.png": {
-    "name": "PayPal",
-    "safe_domains": ["paypal.com", "paypal.me"]
-  },
-  "logos/microsoft.png": {
-    "name": "Microsoft",
-    "safe_domains": ["microsoft.com", "live.com", "office.com"]
-  },
-  "logos/google.png": {
-    "name": "Google",
-    "safe_domains": ["google.com", "gmail.com", "accounts.google.com"]
-  }
+  "logos/google.png": { "name": "Google", "safe_domains": ["google.com", "gmail.com", "accounts.google.com", "youtube.com"] },
+  "logos/microsoft.png": { "name": "Microsoft", "safe_domains": ["microsoft.com", "live.com", "office.com", "azure.com", "outlook.com"] },
+  "logos/apple.png": { "name": "Apple", "safe_domains": ["apple.com", "icloud.com"] },
+  "logos/amazon.png": { "name": "Amazon", "safe_domains": ["amazon.com", "amazon.co.uk", "amazon.in", "aws.amazon.com"] },
+  "logos/adobe.png": { "name": "Adobe", "safe_domains": ["adobe.com", "behance.net"] },
+  "logos/dropbox.png": { "name": "Dropbox", "safe_domains": ["dropbox.com"] },
+  
+  "logos/paypal.png": { "name": "PayPal", "safe_domains": ["paypal.com", "paypal.me"] },
+  "logos/chase.png": { "name": "Chase Bank", "safe_domains": ["chase.com"] },
+  "logos/wells_fargo.png": { "name": "Wells Fargo", "safe_domains": ["wellsfargo.com"] },
+  "logos/citi.png": { "name": "Citi Bank", "safe_domains": ["citi.com", "citibank.com"] },
+  "logos/boa.png": { "name": "Bank of America", "safe_domains": ["bankofamerica.com"] },
+  "logos/amex.png": { "name": "American Express", "safe_domains": ["americanexpress.com", "amex.com"] },
+  
+  "logos/facebook.png": { "name": "Facebook", "safe_domains": ["facebook.com", "fb.com", "messenger.com"] },
+  "logos/instagram.png": { "name": "Instagram", "safe_domains": ["instagram.com"] },
+  "logos/linkedin.png": { "name": "LinkedIn", "safe_domains": ["linkedin.com"] },
+  "logos/twitter_x.png": { "name": "X (Twitter)", "safe_domains": ["twitter.com", "x.com"] },
+  "logos/whatsapp.png": { "name": "WhatsApp", "safe_domains": ["whatsapp.com"] },
+  
+  "logos/dhl.png": { "name": "DHL", "safe_domains": ["dhl.com"] },
+  "logos/fedex.png": { "name": "FedEx", "safe_domains": ["fedex.com"] },
+  "logos/ups.png": { "name": "UPS", "safe_domains": ["ups.com"] },
+  
+  "logos/netflix.png": { "name": "Netflix", "safe_domains": ["netflix.com"] },
+  "logos/spotify.png": { "name": "Spotify", "safe_domains": ["spotify.com"] },
+  "logos/att.png": { "name": "AT&T", "safe_domains": ["att.com"] },
+  "logos/verizon.png": { "name": "Verizon", "safe_domains": ["verizon.com"] }
 }

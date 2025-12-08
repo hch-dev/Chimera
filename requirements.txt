@@ -13,3 +13,12 @@ loguru
 shap
 cryptography
 pandas
+fastapi>=0.100.0
+uvicorn[standard]>=0.23.0
+python-multipart
+requests
+pydantic
+tldextract
+dnspython
+python-whois
+beautifulsoup4

@@ -22,7 +22,7 @@ def get_logger(name: str) -> logging.Logger:
         return logger
 
     # Set logger level to DEBUG so all messages are passed up to the handlers
-    logger.setLevel(logging.DEBUG) 
+    logger.setLevel(logging.DEBUG)
 
     # --- File Handler (Rotating) ---
     # Log detailed information to a file, rotating it after 2MB.
@@ -42,16 +42,16 @@ def get_logger(name: str) -> logging.Logger:
     formatter = logging.Formatter(
         "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
     )
-    
+
     file_handler.setFormatter(formatter)
     console_handler.setFormatter(formatter)
 
     # Attach handlers
     logger.addHandler(file_handler)
     logger.addHandler(console_handler)
-    
+
     # Disable propagation to the root logger to prevent duplicate output
-    logger.propagate = False 
+    logger.propagate = False
 
     return logger
 

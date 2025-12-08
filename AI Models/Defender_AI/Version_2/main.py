@@ -1,71 +1,73 @@
 import sys
-from log import LOG
-from modules.static_scanner import StaticScanner
-from modules.visual_scanner import VisualScanner
-from utils.score_fusion import ScoreFusion
+import os
 
-# Configuration
-THRESHOLD = 50 
+# --- 1. PATH FIX (Crucial for Server Integration) ---
+# This ensures Python can find 'log.py' and 'modules' inside Version_2
+# even when the server runs from a different folder.
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+if BASE_DIR not in sys.path:
+    sys.path.append(BASE_DIR)
 
-def run_analysis(url: str):
+# --- 2. IMPORTS ---
+try:
+    from log import LOG
+    from modules.visual_scanner import VisualScanner
+    # Note: We REMOVED StaticScanner and ScoreFusion (Standalone Mode)
+except ImportError as e:
+    # Fallback logger if file is missing during setup
+    print(f"⚠️ V2 Import Warning: {e}")
+    class DummyLogger:
+        def info(self, msg): print(f"[V2] {msg}")
+        def error(self, msg): print(f"[V2 ERROR] {msg}")
+    LOG = DummyLogger()
+    VisualScanner = None
+
+# --- 3. STANDALONE ENGINE LOGIC ---
+def predict_url(url: str):
     """
-    Orchestrates the V1 (static) and V2 (visual) analysis, fuses the scores, 
-    and determines the final verdict.
+    Runs ONLY the Visual Analysis (CNN) on the URL.
     """
-    # 1. Initialize Scanners
-    static_scanner = StaticScanner()
-    visual_scanner = VisualScanner()
-    fusion = ScoreFusion()
+    LOG.info(f"--- Starting Standalone V2 Analysis on: {url} ---")
 
-    # 2. Run V1 Static Analysis (Heuristics)
-    # The static scanner performs syntactic checks on the URL structure.
-    v1_score, analysis_v1 = static_scanner.get_static_score(url)
-    LOG.info(f"V1 Static Heuristic Score: {v1_score}/100")
-    
-    # 3. Run V2 Visual Analysis (CNN Model - Currently Mocked)
-    # The visual scanner captures the page and analyzes its content layout.
-    v2_score = visual_scanner.get_visual_score(url)
-    LOG.info(f"V2 Visual CNN Score: {v2_score}/100")
+    try:
+        if not VisualScanner:
+            raise ImportError("VisualScanner module is missing.")
 
-    # 4. Fuse Scores
-    # Weights: V1 (40%) and V2 (60%) for balanced detection
-    final_score = fusion.fuse_scores(v1_score, v2_score, weight_v1=0.4, weight_v2=0.6)
-    
-    # 5. Determine Verdict
-    if final_score >= THRESHOLD:
-        verdict = "HIGH RISK - PHISHING"
-    else:
-        verdict = "LOW RISK - Legitimate"
+        # Initialize Visual Scanner (Selenium + TensorFlow)
+        scanner = VisualScanner()
 
-    # 6. Report Results
-    
-    # Print the detailed analysis to the console
-    print("\n" + "=" * 50)
-    print(f"| URL Analyzed: {url}")
-    print(f"| Final V2 Hybrid Score: {final_score}/100")
-    print(f"| Verdict: {verdict}")
-    print(f"| V1 Heuristic Score: {v1_score}")
-    print(f"| V2 Visual CNN Score: {v2_score}")
-    print("=" * 50 + "\n")
+        # Run Prediction
+        # We only use the CNN score now. No weighting, no fusion.
+        visual_score = scanner.get_visual_score(url)
 
-    # Log the final result
-    LOG.info(f"ANALYSIS COMPLETE for {url}. Final Score: {final_score}, Verdict: {verdict}")
+        # Determine Verdict (Simple Threshold)
+        # Assuming score is 0-100.
+        verdict = "SAFE"
+        if visual_score > 50:
+            verdict = "PHISHING"
 
+        LOG.info(f"Analysis Complete. Score: {visual_score}, Verdict: {verdict}")
 
+        return {
+            "version": "v2_visual_standalone",
+            "verdict": verdict,
+            "confidence": visual_score,
+            "details": {
+                "scan_type": "Visual CNN",
+                "image_analysis_score": visual_score
+            }
+        }
+
+    except Exception as e:
+        LOG.error(f"Scan Failed: {e}")
+        return {
+            "version": "v2_visual_standalone",
+            "verdict": "ERROR",
+            "confidence": 0,
+            "details": {"error": str(e)}
+        }
+
+# --- 4. CLI TESTER (Optional) ---
 if __name__ == "__main__":
-    
-    target_url = None
-
-    # Check for command-line argument (e.g., python main.py https://example.com)
-    if len(sys.argv) > 1:
-        target_url = sys.argv[1]
-    else:
-        # If no argument is provided, prompt the user for input
-        print("\n--- Defender V2 Phishing Analysis ---")
-        target_url = input("Please enter the URL to analyze: ").strip()
-
-    if target_url:
-        LOG.info(f"Starting Defender V2 Analysis on: {target_url}")
-        run_analysis(target_url)
-    else:
-        print("No URL provided. Exiting analysis.")
+    test_url = input("Enter URL for Visual Scan: ")
+    print(predict_url(test_url))

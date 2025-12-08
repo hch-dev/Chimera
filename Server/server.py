@@ -68,5 +68,6 @@ else:
     print("   Server running in API-Only mode.")
 
 if __name__ == "__main__":
-    # Run on Port 5000
-    uvicorn.run(app, host="0.0.0.0", port=5000)
+    # Use the PORT environment variable provided by Render, or default to 5000
+    port = int(os.environ.get("PORT", 5000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
