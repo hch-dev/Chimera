@@ -121,7 +121,7 @@ async def scan_email_content(subject: str, body: str, sender: str):
 # ==========================================
 # 6. ENDPOINTS
 # ==========================================
-@app.get("/")
+@app.get("/scan")
 def home():
     status = "Active" if predict else "Model Missing"
     return {"status": "Chimera Email Defender V3 Running", "ai_engine": status}
