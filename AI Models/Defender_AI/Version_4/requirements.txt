@@ -1,0 +1,8 @@
+torch
+torch_geometric
+pandas
+scikit-learn
+networkx
+numpy
+dnspython
+requests
