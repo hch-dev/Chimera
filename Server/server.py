@@ -1,73 +1,71 @@
-# Chimera/Server/server.py
-import os
 import uvicorn
+import os
+import logging
 from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-# Import Logic
-from main import scan_url
+# Initialize the App
+app = FastAPI(title="Chimera Email Server")
 
-app = FastAPI()
+# Setup Logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-# --- 1. CORS (CRITICAL FOR EXTENSION) ---
-# This allows your Chrome Extension to talk to this server
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"], # Allows all extensions/websites
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+print("==================================================")
+print("🚀 STARTING CHIMERA EMAIL SERVER")
+print("==================================================")
 
-# --- 2. API ENDPOINTS ---
+# --- 1. Attempt to load the AI Module ---
+# Your logs showed this failed because 'torch' was missing.
+# We wrap it in try/except so the server doesn't crash immediately if dependencies are missing.
+try:
+    import torch
+    import predict # This assumes you have a predict.py file in the same folder
+    logger.info("✅ AI Engine loaded successfully")
+    ai_available = True
+except ImportError as e:
+    logger.error(f"❌ Failed to import AI modules: {e}")
+    logger.warning("Server will start, but scanning will be disabled until 'torch' is installed.")
+    ai_available = False
+
+# --- 2. Define Request Model ---
+# This defines what data you expect to receive on the /scan endpoint
 class ScanRequest(BaseModel):
     url: str
+    # Add other fields here if your AI needs them (e.g., email_body, sender)
 
-@app.get("/api/status")
-def health_check():
-    return {"status": "Chimera Server Online", "mode": "Unified Server"}
+# --- 3. Routes ---
+
+@app.get("/")
+def home():
+    """Health Check Endpoint"""
+    return {
+        "status": "online",
+        "message": "Chimera Phishing Detection Server is Running",
+        "ai_status": "Active" if ai_available else "Disabled (Missing Dependencies)"
+    }
 
 @app.post("/scan")
-async def api_scan(request: ScanRequest):
+def scan_url(request: ScanRequest):
+    """The Missing Endpoint that caused the 404 error"""
+    if not ai_available:
+        raise HTTPException(status_code=503, detail="AI Engine is not loaded. Check server logs.")
+    
     try:
-        # Run the AI Scan
-        result = await scan_url(request.url)
-
-        # Format for Frontend/Extension
-        response = {
-            "verdict": result["verdict"],
-            "confidence": result["final_score"],
-            "details": {}
-        }
-
-        for feat in result["features"]:
-            name = feat.get("feature_name")
-            if name:
-                response["details"][name] = feat
-
-        return response
-
+        # CALL YOUR AI FUNCTION HERE
+        # Assuming predict.py has a function like 'predict_phishing(url)'
+        # You might need to adjust 'predict.analyze' to whatever your function is actually named.
+        result = predict.analyze(request.url) 
+        
+        return {"url": request.url, "result": result, "status": "scanned"}
     except Exception as e:
-        print(f"❌ Server Error: {e}")
+        logger.error(f"Error during scan: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-# --- 3. SERVE FRONTEND ---
-# Locates the 'Website/Frontend' folder relative to this file
-current_dir = os.path.dirname(os.path.abspath(__file__)) # .../Server
-project_root = os.path.dirname(current_dir)              # .../Chimera
-frontend_path = os.path.join(project_root, "Website", "Frontend")
-
-if os.path.exists(frontend_path):
-    print(f"📂 Hosting Website from: {frontend_path}")
-    # This serves index.html at http://localhost:5000/
-    app.mount("/", StaticFiles(directory=frontend_path, html=True), name="static")
-else:
-    print(f"⚠️ FRONTEND NOT FOUND AT: {frontend_path}")
-    print("   Server running in API-Only mode.")
-
+# --- 4. Server Startup ---
 if __name__ == "__main__":
-    # Use the PORT environment variable provided by Render, or default to 5000
-    port = int(os.environ.get("PORT", 5000))
+    # CRITICAL: Render provides the PORT variable. Default to 10000 locally.
+    port = int(os.environ.get("PORT", 10000))
+    
+    # Run Uvicorn
     uvicorn.run(app, host="0.0.0.0", port=port)
