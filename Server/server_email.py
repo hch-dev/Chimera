@@ -4,9 +4,8 @@ import uvicorn
 import asyncio
 import logging
 from concurrent.futures import ThreadPoolExecutor
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.routing import APIRoute
 from pydantic import BaseModel
 from typing import Optional
 
@@ -100,7 +99,6 @@ async def scan_email_content(subject: str, body: str, sender: str):
 def home():
     return {"status": "Chimera Local Server Running", "port": 5000, "ai_engine": "Active" if predict else "Missing"}
 
-# IMPORTANT: This handles the POST request
 @app.post("/api/email/scan")
 async def scan_email_endpoint(request: EmailRequest):
     try:
@@ -112,20 +110,4 @@ async def scan_email_endpoint(request: EmailRequest):
             body=request.body,
             sender=request.sender
         )
-        email_logger.info(f"Scan Success: {result['verdict']} ({result['score']}%)")
-        return {"success": True, "data": result}
-
-    except Exception as e:
-        email_logger.error(f"Scan failed: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-# ==========================================
-# 7. SERVER START & DEBUG INFO
-# ==========================================
-if __name__ == "__main__":
-    print("\n" + "="*50)
-    print("🚀 STARTING CHIMERA EMAIL SERVER (Localhost:5000)")
-    print("="*50)
-
-    # Run the server
-    uvicorn.run(app, host="0.0.0.0", port=5000)
+        email_logger.info(f"Scan Success: {result['verdict']} ({result
