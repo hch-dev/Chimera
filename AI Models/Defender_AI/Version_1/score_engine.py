@@ -4,7 +4,11 @@ from log import get_logger
 
 logger = get_logger(__name__)
 
-# Weights remain the same, but we add logic to handle them differently
+# --- THRESHOLDS ---
+# We define these here so they are easy to tweak later
+SAFE_LIMIT = 45
+PHISHING_LIMIT = 75
+
 FEATURE_WEIGHTS = {
     "homoglyph_impersonation": 0.60,
     "open_redirect_detection": 0.55,
@@ -22,29 +26,27 @@ FEATURE_WEIGHTS = {
 }
 
 # --- SMOKING GUNS ---
-# If any of these score 100, we don't need corroboration.
-# These are technical facts that are rarely false positives.
+# Technical facts that trigger immediate Phishing verdict (> 75)
 SMOKING_GUNS = {
     "data_uri_scheme",
     "homoglyph_impersonation",
-    "domain_abuse_detection" # e.g., paypal-login.com
+    "domain_abuse_detection"
 }
 
 def evaluate_score(feature_results: list) -> float:
     """
-    Robust Scoring Engine v2
+    Robust Scoring Engine v2 (Updated for SIH Logic)
 
-    1. Filter out errors/ignored features (Score=None).
-    2. Check for "Smoking Guns" (Instant Fail).
-    3. Calculate Weighted Average.
-    4. Apply Corroboration Logic for "Soft" High Scores (like Threat Intel).
+    Ranges:
+    - 0  to 45: Safe
+    - 45 to 75: Suspicious (Uncertain/Uncorroborated)
+    - 75 to 100: Phishing
     """
 
     valid_results = []
 
     # 1. Filtering Phase
     for r in feature_results:
-        # We explicitly check for None. If score is 0, we keep it!
         if r.get("score") is not None and not r.get("error"):
             valid_results.append(r)
         else:
@@ -58,7 +60,7 @@ def evaluate_score(feature_results: list) -> float:
     max_score = 0
     max_feature = ""
 
-    high_risk_count = 0 # How many features think this is bad (>50)?
+    high_risk_count = 0
 
     # 2. Calculation Phase
     for r in valid_results:
@@ -71,7 +73,8 @@ def evaluate_score(feature_results: list) -> float:
             max_score = score
             max_feature = name
 
-        if score > 60:
+        # We count a feature as "risky" if it pushes past the Safe zone (> 45)
+        if score > SAFE_LIMIT:
             high_risk_count += 1
 
         weighted_sum += (score * weight)
@@ -79,29 +82,48 @@ def evaluate_score(feature_results: list) -> float:
 
     base_avg = weighted_sum / total_weight if total_weight > 0 else 0
 
-    # 3. Decision Phase (The Rewrite)
+    # 3. Decision Phase (New Logic)
     final_score = base_avg
 
     # RULE A: The "Smoking Gun" Override
-    # If a technical feature is 100% sure, we assume it's true regardless of average.
+    # If a technical feature is very high, we force it into the Phishing zone (>75).
     if max_score >= 90 and max_feature in SMOKING_GUNS:
         logger.info(f"Smoking Gun Triggered: {max_feature}")
-        final_score = max(final_score, 95.0)
+        # Force a minimum of 90, regardless of average
+        final_score = max(final_score, 90.0)
 
-    # RULE B: The "Corroboration" Override
-    # If Threat Intel says "Bad" (100), but everything else says "Safe" (0),
-    # and we have no other high risks, we trust the average (which will be low),
-    # or cap the max score.
-    elif max_score >= 80:
+    # RULE B: The "Corroboration" Check
+    # We check if the max score exceeds the Phishing Limit (75)
+    elif max_score > PHISHING_LIMIT:
+
         if high_risk_count >= 2:
-            # We have corroboration (e.g., Threat Intel + Bad SSL)
-            # Boost the score towards the max
-            final_score = max(base_avg, max_score * 0.90)
+            # Case 1: Corroborated (Multiple features agree it's bad)
+            # We push the score higher into the Phishing zone
+            final_score = max(base_avg, max_score * 0.95)
+            logger.info(f"Corroborated Phishing Detected. Score boosted.")
+
         else:
-            # Isolated incident (False Positive protection)
-            # We dampen the single high score.
-            logger.info(f"Uncorroborated High Score: {max_feature}. Dampening.")
-            # Average of (Base, Max) helps pull it up but not to 100
-            final_score = (base_avg + max_score) / 2
+            # Case 2: Uncorroborated (One feature says 90, others say 0)
+            # This is likely a False Positive or a grey area.
+            # We must force this into the SUSPICIOUS zone (45 - 75).
+
+            logger.info(f"Uncorroborated High Score ({max_feature}). Clamping to Suspicious.")
+
+            # Simple average dampening
+            dampened_score = (base_avg + max_score) / 2
+
+            # Clamp logic: Ensure it stays strictly within 45 and 75
+            # max(46, ...) ensures it's slightly above safe.
+            # min(..., 74) ensures it's slightly below phishing.
+            final_score = max(SAFE_LIMIT + 1, min(dampened_score, PHISHING_LIMIT - 1))
 
     return round(final_score, 2)
+
+# Helper function (Optional, can be used in your API)
+def get_risk_label(score):
+    if score <= SAFE_LIMIT:
+        return "SAFE"
+    elif score <= PHISHING_LIMIT:
+        return "SUSPICIOUS"
+    else:
+        return "PHISHING"
