@@ -92,11 +92,11 @@ async def run_scan(url: str):
 
     print("-" * 50)
 
-    # Verdict Logic
-    if final_score > 80:
+    # Verdict Logic (Updated for new thresholds)
+    if final_score > 75:
         print(f"❌ VERDICT: PHISHING DETECTED (Score: {final_score})")
         print("   Action: BLOCK IMMEDIATELY")
-    elif final_score > 40:
+    elif final_score > 50:
         print(f"⚠️ VERDICT: SUSPICIOUS (Score: {final_score})")
         print("   Action: WARN USER & SANDBOX")
     else:

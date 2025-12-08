@@ -5,9 +5,9 @@ from log import get_logger
 logger = get_logger(__name__)
 
 # --- THRESHOLDS ---
-# We define these here so they are easy to tweak later
-SAFE_LIMIT = 45
-PHISHING_LIMIT = 75
+# Updated Thresholds
+SAFE_LIMIT = 50       # 0 to 50 is Safe
+PHISHING_LIMIT = 75   # Above 75 is Phishing
 
 FEATURE_WEIGHTS = {
     "homoglyph_impersonation": 0.60,
@@ -38,8 +38,8 @@ def evaluate_score(feature_results: list) -> float:
     Robust Scoring Engine v2 (Updated for SIH Logic)
 
     Ranges:
-    - 0  to 45: Safe
-    - 45 to 75: Suspicious (Uncertain/Uncorroborated)
+    - 0  to 50: Safe
+    - 50 to 75: Suspicious (Uncertain/Uncorroborated)
     - 75 to 100: Phishing
     """
 
@@ -73,7 +73,7 @@ def evaluate_score(feature_results: list) -> float:
             max_score = score
             max_feature = name
 
-        # We count a feature as "risky" if it pushes past the Safe zone (> 45)
+        # We count a feature as "risky" if it pushes past the Safe zone (> 50)
         if score > SAFE_LIMIT:
             high_risk_count += 1
 
@@ -105,15 +105,15 @@ def evaluate_score(feature_results: list) -> float:
         else:
             # Case 2: Uncorroborated (One feature says 90, others say 0)
             # This is likely a False Positive or a grey area.
-            # We must force this into the SUSPICIOUS zone (45 - 75).
+            # We must force this into the SUSPICIOUS zone (50 - 75).
 
             logger.info(f"Uncorroborated High Score ({max_feature}). Clamping to Suspicious.")
 
             # Simple average dampening
             dampened_score = (base_avg + max_score) / 2
 
-            # Clamp logic: Ensure it stays strictly within 45 and 75
-            # max(46, ...) ensures it's slightly above safe.
+            # Clamp logic: Ensure it stays strictly within 50 and 75
+            # max(51, ...) ensures it's slightly above safe.
             # min(..., 74) ensures it's slightly below phishing.
             final_score = max(SAFE_LIMIT + 1, min(dampened_score, PHISHING_LIMIT - 1))
 
