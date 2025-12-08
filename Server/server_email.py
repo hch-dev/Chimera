@@ -105,9 +105,28 @@ async def scan_email_endpoint(request: EmailRequest):
         if not request.body and not request.subject:
             raise HTTPException(status_code=400, detail="Email content cannot be empty.")
 
+        # 1. Run the scan
         result = await scan_email_content(
             subject=request.subject,
             body=request.body,
             sender=request.sender
         )
-        email_logger.info(f"Scan Success: {result['verdict']} ({result
+
+        # 2. Log the success
+        email_logger.info(f"Scan Success: {result['verdict']} ({result['score']}%)")
+
+        # 3. Return data to Frontend
+        return {"success": True, "data": result}
+
+    except Exception as e:
+        email_logger.error(f"Scan failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ==========================================
+# 7. MAIN EXECUTION
+# ==========================================
+if __name__ == "__main__":
+    print("\n" + "="*50)
+    print("🚀 STARTING CHIMERA EMAIL SERVER (Localhost:5000)")
+    print("="*50)
+    uvicorn.run(app, host="0.0.0.0", port=5000)

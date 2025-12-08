@@ -1,0 +1,8 @@
+{
+    "url": "https://www.google.com",
+    "phishing_detected": true,
+    "evidence": [
+        "Found Microsoft logo on suspicious domain: https://www.google.com/"
+    ],
+    "final_url": "https://www.google.com/"
+}
