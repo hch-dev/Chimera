@@ -3,55 +3,49 @@ import uvicorn
 import logging
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
 
-# Initialize the App
-app = FastAPI()
+# Import the AI logic (we will create this file next)
+import predict
+
+# Initialize App
+app = FastAPI(title="Chimera URL Scanner")
+
+# --- CRITICAL: FIX CORS ---
+# This allows your frontend to talk to this backend without "Access Denied" errors
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Setup Logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# --- REQUEST MODEL ---
-class ScanRequest(BaseModel):
+# Request Model
+class UrlRequest(BaseModel):
     url: str
-
-# --- ROUTES ---
 
 @app.get("/")
 def home():
-    return {"status": "online", "message": "Chimera Backend is Running"}
+    return {"message": "Chimera URL Scanner is Online", "status": "active"}
 
 @app.post("/scan")
-def scan_url(request: ScanRequest):
-    """
-    This is the endpoint your frontend is trying to reach.
-    """
-    logger.info(f"Received scan request for: {request.url}")
+def scan_url(request: UrlRequest):
+    logger.info(f"Scanning URL: {request.url}")
     
     try:
-        # ---------------------------------------------------------
-        # AI INTEGRATION SECTION
-        # ---------------------------------------------------------
-        # If you have your 'predict.py' file, uncomment the lines below:
-        # import predict
-        # result = predict.analyze(request.url)
-        
-        # FOR NOW: We return a dummy response so the 404 error goes away.
-        # Once you have your AI code back, replace this line with the real logic.
-        result = "AI Scan Placeholder - Logic Missing"
-        
-        return {
-            "url": request.url, 
-            "result": result, 
-            "status": "safe" # or "phishing"
-        }
+        # Call the AI analysis function from predict.py
+        result = predict.analyze_url(request.url)
+        return result
     except Exception as e:
-        logger.error(f"Error processing scan: {e}")
+        logger.error(f"Scan failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-# --- SERVER STARTUP ---
 if __name__ == "__main__":
-    # Get the PORT from Render (default to 10000)
+    # Use Render's PORT variable, default to 10000 locally
     port = int(os.environ.get("PORT", 10000))
-    # Listen on 0.0.0.0 (Required for Render)
     uvicorn.run(app, host="0.0.0.0", port=port)
