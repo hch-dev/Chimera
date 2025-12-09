@@ -1,6 +1,7 @@
 # Chimera
 
-**Real-time AI/ML based Phishing detection and prevention system.**
+**PS ID - SIH25159**
+**Real-time AI/ML based Phishing Detection and Prevention System.**
 
 ---
 
@@ -15,8 +16,7 @@
 ---
 
 ## 🌟 Why Chimera?
-- **Superior AI Models:** Real-world GAN-based detection (vs. generic tools).
-- **High Accuracy & Real-Time:** >95% actual performance.
+- **Superior AI Models:** Real-world GAN-based detection.
 - **Easy-to-Use:** No technical skills needed; quick scan from browser or website.
 - **Fast Updates:** New threats detected daily.
 - **API Integration:** Plug into enterprise workflows quickly.
@@ -37,21 +37,6 @@
 
 ---
 
-## ⚡ Quick Install
-
-**Extension:**  
-1. Go to `chrome://extensions/`
-2. Enable Developer Mode
-3. Click "Load unpacked" → select `extension/`
-
-**Web:**  
-1. Use the website to scan URLs/emails instantly.
-
-**API:**  
-1. Contact us for docs/integration.
-
----
-
 ## 👥 Team
 
 **Team Name:** Softverse
@@ -64,3 +49,4 @@
 *   **Member 5:** Atharva Deshmane 
 
 ---
+
