@@ -56,22 +56,11 @@
 
 **Team Name:** Softverse
 
-*   **Member 1:** Harsh Choudhari
-*   **Member 2:** Lavanya Shinde 
-*   **Member 3:** Mansi Prajapati
-*   **Member 4:** Aayan Mukadam 
-*   **Member 5:** Atharva Warade
-*   **Member 6:** Atharva Deshmane 
-
----
-
-## 🆘 Support & Contact
-- FAQ/support in dashboard
-- Emergency incidents: [emergency@chimera.com](mailto:emergency@chimera.com)
-
----
-
-## 📄 License
-© 2025 Chimera. All rights reserved.
+*   **Team Leader:** Harsh Choudhari
+*   **Member 1:** Lavanya Shinde 
+*   **Member 2:** Mansi Prajapati
+*   **Member 3:** Aayan Mukadam 
+*   **Member 4:** Atharva Warade
+*   **Member 5:** Atharva Deshmane 
 
 ---
