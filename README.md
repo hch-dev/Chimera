@@ -25,11 +25,6 @@
 
 ## 🗄️ Dataset Panel
 
-- **Dataset Sources:**
-  - Public phishing URL/email datasets
-  - Proprietary annotated datasets
-  - Continual updates with latest threats
-
 - **Usage in Chimera:**
   - Data drives model training, accuracy improvement, & threat detection.
   - Panel available in the dashboard to view statistics and curate data.
@@ -74,3 +69,4 @@ Sources providing **threat intelligence, market insights, and official guideline
 
 ## Final PPT
 https://docs.google.com/presentation/d/1QDBup4SnMceVwKwJ2KHb8WgC6OeB80BgmLSQfhgyZ9E/edit?slide=id.p#slide=id.p
+
