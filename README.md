@@ -1,4 +1,4 @@
-# 🔱 Chimera
+# Chimera
 
 **PS ID - SIH25159**
 **Real-time AI/ML based Phishing Detection and Prevention System.**
@@ -69,3 +69,4 @@ Sources providing **threat intelligence, market insights, and official guideline
 *   **Member 3:** Aayan Mukadam
 *   **Member 4:** Atharva Warade
 *   **Member 5:** Atharva Deshmane
+
