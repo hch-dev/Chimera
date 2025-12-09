@@ -63,10 +63,14 @@ Sources providing **threat intelligence, market insights, and official guideline
 
 **Team Name:** Softverse
 
-*   **Team Leader:** Harsh Choudhari
-*   **Member 1:** Lavanya Shinde
-*   **Member 2:** Mansi Prajapati
-*   **Member 3:** Aayan Mukadam
-*   **Member 4:** Atharva Warade
-*   **Member 5:** Atharva Deshmane
+*   **Team Leader:** Harsh Choudhari<br>
+*   **Member 1:** Lavanya Shinde<br>
+*   **Member 2:** Mansi Prajapati<br>
+*   **Member 3:** Aayan Mukadam<br>
+*   **Member 4:** Atharva Warade<br>
+*   **Member 5:** Atharva Deshmane<br>
+
+
+Final PPT - https://docs.google.com/presentation/d/1QDBup4SnMceVwKwJ2KHb8WgC6OeB80BgmLSQfhgyZ9E/edit?slide=id.p#slide=id.p
+
 
