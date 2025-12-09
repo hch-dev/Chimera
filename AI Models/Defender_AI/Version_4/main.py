@@ -8,7 +8,7 @@ try:
         from graph_builder import UrlGraphBuilder
         from model import PhishingGNN
     except ImportError:
-        print("⚠️  Warning: 'graph_builder.py' or 'model.py' not found.")
+        # Silently fail or minimal error if running automated
         class UrlGraphBuilder: pass
         class PhishingGNN: pass
 
@@ -22,25 +22,33 @@ MODEL_PATH = "models/latest_checkpoint.pth"
 def load_brain():
     if torch is None: return None, None
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    
-    if not os.path.exists(MODEL_PATH):
-        print(f"❌ Error: Model file not found at {MODEL_PATH}")
-        print("   -> You need to run 'train.py' first.")
-        return None, None
+
+    # Check absolute path relative to this script
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    full_model_path = os.path.join(base_dir, MODEL_PATH)
+
+    if not os.path.exists(full_model_path):
+        # Try local path just in case
+        if os.path.exists(MODEL_PATH):
+            full_model_path = MODEL_PATH
+        else:
+            print(f"❌ Error: Model file not found at {full_model_path}")
+            return None, None
 
     try:
         model = PhishingGNN(input_dim=4, hidden_dim=16).to(device)
-        checkpoint = torch.load(MODEL_PATH, map_location=device, weights_only=True)
-        
+        checkpoint = torch.load(full_model_path, map_location=device, weights_only=True)
+
         if 'model_state_dict' in checkpoint:
             model.load_state_dict(checkpoint['model_state_dict'])
         else:
             model.load_state_dict(checkpoint)
 
         model.eval()
+        # Print a clear tag for the aggregator to know we are ready
         print("✅ GNN Model Loaded Successfully.")
         return model, device
-        
+
     except Exception as e:
         print(f"❌ Failed to load model architecture: {e}")
         return None, None
@@ -61,7 +69,7 @@ def get_risk_score(model, device, url, builder):
 
     return int(probability * 100), None
 
-# --- 3. THE RUN FUNCTION (Single Scan Mode) ---
+# --- 3. THE RUN FUNCTION (Automation Friendly) ---
 def run():
     print("="*40)
     print("          DEFENDER V4: Arachne")
@@ -69,46 +77,48 @@ def run():
 
     # 1. Load Model
     model, device = load_brain()
-    
-    # 2. Safety Checks
+
     if model is None:
         print("⚠️  System operating in DIAGNOSTIC MODE (No Neural Network)")
-        input("\nPress Enter to return to menu...")
         return
 
     try:
         builder = UrlGraphBuilder()
     except:
         print("❌ Error: Could not initialize Graph Builder.")
-        input("\nPress Enter to return to menu...")
         return
 
-    # 3. Single Input
+    # 2. Input Handling (Robust)
     try:
-        url = input("\n>> Enter URL to scan: ").strip()
-    except KeyboardInterrupt:
+        # We read input, but we handle the case where input might be empty
+        if len(sys.argv) > 1:
+            url = sys.argv[1] # Allow passing URL as argument
+        else:
+            url = input("\n>> Enter URL to scan: ").strip()
+    except (EOFError, KeyboardInterrupt):
         return
 
-    # 4. Process Logic
+    # 3. Process Logic
     if not url or url.lower() in ['exit', 'quit', 'q']:
-        print("Scan cancelled.")
         return
 
-    # 5. Execute Scan
+    # 4. Execute Scan
     score, error = get_risk_score(model, device, url, builder)
 
     if error:
         print(f"   [!] {error}")
     else:
-        if score < 50: color = "" 
-        elif score < 75: color = "⚠️  " 
-        else: color = "❌ " 
-        
+        # --- CRITICAL: OUTPUT FORMAT FOR AGGREGATOR ---
+        # The Aggregator regex looks for: "Risk Score: XX/100"
+        if score < 50: color = ""
+        elif score < 75: color = "⚠️  "
+        else: color = "❌ "
+
         print(f"   Result: {color}Risk Score: {score}/100")
         print("-" * 30)
 
-    # 6. Pause so user can read result
-    input("\nPress Enter to return to Main Menu...")
+    # 5. NO PAUSE
+    # We explicitly REMOVED the "Press Enter" input here to prevent the EOFError
 
 if __name__ == "__main__":
     run()
