@@ -1,10 +1,11 @@
-fastapi>=0.100.0
-uvicorn[standard]>=0.23.0
-python-multipart
-requests
-pydantic
-# Ensure the libraries for Version_1 are also installed in your env:
+Flask==3.0.3
+flask-cors==5.0.0
+gunicorn==22.0.0
 tldextract
+requests
+aiohttp
+beautifulsoup4
+certifi
 dnspython
 python-whois
-beautifulsoup4
+python-dotenv
